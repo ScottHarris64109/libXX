@@ -83,10 +83,10 @@ public:
          double start, double sweep );
 
    /// Draw text with no background.
-   void drawText( int x, int y, const string text );
+   void drawText( int x, int y, const std::string text );
 
    /// Draw text and fill in its background.
-   void fillText( int x, int y, const string text );
+   void fillText( int x, int y, const std::string text );
 };
 
 #endif /* XXGC_HH_ */

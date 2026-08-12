@@ -34,8 +34,6 @@
 #include <X11/keysymdef.h>
 #include <X11/Xproto.h>
 
-using namespace std;
-
 #define BUFFER_SIZE 255
 
 typedef struct {
@@ -55,23 +53,23 @@ typedef struct {
 
 bool finished = false;
 
-multimap<string,string> parse_args( int argc, char *argv[] );
-string getArg( const multimap<string,string> &arg, string key, int index=0, 
-      string defaultValue = "" );
+std::multimap<std::string,std::string> parse_args( int argc, char *argv[] );
+std::string getArg( const std::multimap<std::string,std::string> &arg, 
+      std::string key, int index=0, std::string defaultValue = "" );
 void scribble( XXGC *gc, XXColor *color1, XXColor *color2 );
 void loop( XXDisplay *display, XXWindow *window, XXGC *gc, XXFont *font, 
       XXColor *fg1, XXColor *fg2 );
-string modState( unsigned int eventState );
+std::string modState( unsigned int eventState );
 extern "C" int criticalErrorHandler( Display *display, XErrorEvent *error );
 extern "C" int fatalErrorHandler( Display *display );
 extern "C" void signalHandler( int theSignal );
 
 int main( int argc, char *argv[] ) {
-   multimap<string,string> arg = parse_args( argc, argv );
-   string displayName = getArg( arg, "-display" );
-   string fg1name = getArg( arg, "-foreground", 0, "black" );
-   string fg2name = getArg( arg, "-foreground", 1, "red" );
-   string bgname  = getArg( arg, "-background", 0, "white" );
+   std::multimap<std::string,std::string> arg = parse_args( argc, argv );
+   std::string displayName = getArg( arg, "-display" );
+   std::string fg1name = getArg( arg, "-foreground", 0, "black" );
+   std::string fg2name = getArg( arg, "-foreground", 1, "red" );
+   std::string bgname  = getArg( arg, "-background", 0, "white" );
    XXDisplay *display;
    XXWindow *window;
    XXColor *fg1   = NULL;
@@ -83,34 +81,34 @@ int main( int argc, char *argv[] ) {
    signal( SIGABRT, signalHandler );
    signal( SIGTERM, signalHandler );
 
-   cout << 
+   std::cout << 
       "libXX demo  Copyright (C) 2014,2016,2026  Scott Harris\n\n"
       "This program comes with ABSOLUTELY NO WARRANTY. \n"
       "This is free software, and you are welcome to redistribute it \n"
       "under certain conditions.  (See the GNU GPL version 3 for details).\n\n";
 
    display = new XXDisplay( displayName );
-   cout << "Got display.\n";
-   cout << display->vendorName() << " | " << display->name() <<"\n";
-   cout << display->screenCount() << " screens.\n";
+   std::cout << "Got display.\n";
+   std::cout << display->vendorName() << " | " << display->name() <<"\n";
+   std::cout << display->screenCount() << " screens.\n";
    for (int screen=0; screen < display->screenCount(); screen++)
    {
-      cout << "  " << screen << ". " << display->width( screen ) 
-	      << " x " << display->height( screen ) 
-	      << " x " << display->colorDepth( screen ) << "\n";
+      std::cout << "  " << screen << ". " << display->width( screen ) 
+         << " x " << display->height( screen ) 
+         << " x " << display->colorDepth( screen ) << "\n";
    }
 
    XSetErrorHandler( criticalErrorHandler );
    XSetIOErrorHandler( fatalErrorHandler );
 
-   cout << "Getting colors.\n";
+   std::cout << "Getting colors.\n";
    background = display->getColor( bgname );
    fg1 = display->getColor( fg1name );
    fg2 = display->getColor( fg2name );
-   cout << "Got colors.\n";
+   std::cout << "Got colors.\n";
 
    window = new XXWindow( display, 500, 100, 500, 500, background );
-   cout << "Got window.\n";
+   std::cout << "Got window.\n";
 
    gc = new XXGC( window );
 
@@ -132,17 +130,17 @@ int main( int argc, char *argv[] ) {
    exit( EXIT_SUCCESS );
 }
 
-multimap<string,string> parse_args( int argc, char *argv[] ) {
-   multimap<string,string> args;
-   string key = "";
-   string value = "";
+std::multimap<std::string,std::string> parse_args( int argc, char *argv[] ) {
+   std::multimap<std::string,std::string> args;
+   std::string key = "";
+   std::string value = "";
 
    for (int a=1; a < argc; a++) {
       if (argv[a][0] == '-') {
          if ((key != "") && (args.count( key ) == 0)) {
-            args.insert( pair<string,string>( key, "" ) );
+            args.insert( std::pair<std::string,std::string>( key, "" ) );
          }
-         key = string( argv[a] );
+         key = std::string( argv[a] );
          if (key == "-bg")   key = "-background";
          if (key == "-bd")   key = "-bordercolor";
          if (key == "-bw")   key = "-borderwidth";
@@ -152,16 +150,16 @@ multimap<string,string> parse_args( int argc, char *argv[] ) {
          if (key == "-geom") key = "-geometry";
          if (key == "-name") key = "-title";
       } else {
-         value = string( argv[a] );
-         args.insert( pair<string,string>( key, value ));
+         value = std::string( argv[a] );
+         args.insert( std::pair<std::string,std::string>( key, value ));
       }
    }
 
    return args;
 }
 
-string getArg( const multimap<string,string> &arg, string key, int index, 
-      string defaultValue ) {
+std::string getArg( const std::multimap<std::string,std::string> &arg, 
+      std::string key, int index, std::string defaultValue ) {
    if (arg.count( key ) <= index) return defaultValue;
    return arg.find(key)->second;
 /*
@@ -198,332 +196,333 @@ void loop( XXDisplay *display, XXWindow *window, XXGC *gc, XXFont *font,
 
          case ClientMessage:
             if (event.xclient.data.l[0] == windowClosed) {
-               cout << "Main window closed.\n";
+               std::cout << "Main window closed.\n";
                finished = true;
             }
             break;
 
          case Expose:
-            cout << "Exposed.\n";
+            std::cout << "Exposed.\n";
             scribble( gc, fg1, fg2 );
             break;
 
          case MapNotify:
-            cout << "Mapped.\n";
+            std::cout << "Mapped.\n";
             scribble( gc, fg1, fg2 );
             break;
 
          case ConfigureNotify:
-            cout << "Reconfigured.\n";
+            std::cout << "Reconfigured.\n";
             scribble( gc, fg1, fg2 );
             break;
 
          case ButtonPress:
-            cout << "Pressed " << modState( event.xbutton.state ) << " ";
-            cout << "button " << event.xbutton.button << ".\n";
+            std::cout << "Pressed " << modState( event.xbutton.state ) << " ";
+            std::cout << "button " << event.xbutton.button << ".\n";
             break;
-	 // Button 4 = Scroll up
-	 // Button 5 = Scroll down
+    // Button 4 = Scroll up
+    // Button 5 = Scroll down
 
          case ButtonRelease:
-            cout << "Released " << modState( event.xbutton.state ) << " ";
-            cout << "button " << event.xbutton.button << ".\n";
+            std::cout << "Released " << modState( event.xbutton.state ) << " ";
+            std::cout << "button " << event.xbutton.button << ".\n";
             break;
 
          case KeyPress:
             chars = XLookupString( &event.xkey, keyBuffer, BUFFER_SIZE, 
                   &keySym, &composeStatus );
-            cout << "Pressed " << modState( event.xkey.state );
+            std::cout << "Pressed " << modState( event.xkey.state );
             if ((chars > 0) && (keySym >= ' ') && (keySym <= '~')) {
                if (event.xkey.state & ControlMask) {
                   char letter = (char) keySym;
-                  cout << "\"^" << letter << "\" #" 
-                       << hex << (int) keySym << ".\n";
+                  std::cout << "\"^" << letter << "\" #" 
+                       << std::hex << (int) keySym << ".\n";
                } else {
-                  cout << "\"" << keyBuffer[0] << "\".\n";
+                  std::cout << "\"" << keyBuffer[0] << "\".\n";
                }
             } else {
                switch( keySym ) {
                   case XK_Return:
-                     cout << "Return";
+                     std::cout << "Return";
                      break;
                   case XK_BackSpace:
-                     cout << "BackSpace";
+                     std::cout << "BackSpace";
                      break;
                   case XK_Escape:
-                     cout << "Escape";
+                     std::cout << "Escape";
                      finished = true;
                      break;
                   case XK_Delete:
-                     cout << "Delete";
+                     std::cout << "Delete";
                      break;
                   case XK_Up:
-                     cout << "Up";
+                     std::cout << "Up";
                      break;
                   case XK_Down:
-                     cout << "Down";
+                     std::cout << "Down";
                      break;
                   case XK_Right:
-                     cout << "Right";
+                     std::cout << "Right";
                      break;
                   case XK_Left:
-                     cout << "Left";
+                     std::cout << "Left";
                      break;
                   case XK_Home:
-                     cout << "Home";
+                     std::cout << "Home";
                      break;
                   case XK_Prior:
-                     cout << "Page Up";
+                     std::cout << "Page Up";
                      break;
                   case XK_Next:
-                     cout << "Page down";
+                     std::cout << "Page down";
                      break;
                   case XK_Begin:
-                     cout << "Begin";
+                     std::cout << "Begin";
                      break;
                   case XK_End:
-                     cout << "End";
+                     std::cout << "End";
                      break;
                   case XK_Insert:
-                     cout << "Insert";
+                     std::cout << "Insert";
                      break;
                   case XK_Help:
-                     cout << "Help";
+                     std::cout << "Help";
                      break;
                   case XK_Menu:
-                     cout << "Menu";
+                     std::cout << "Menu";
                      break;
                   case XK_Print:
-                     cout << "Print";
+                     std::cout << "Print";
                      break;
                   case XK_Tab:
-                     cout << "Tab";
+                     std::cout << "Tab";
                      break;
                   case XK_Break: // Ctrl-Pause/Break
-                     cout << "Break";
+                     std::cout << "Break";
                      break;
-		  case XK_Sys_Req: // Unreachable?
-		     cout << "SysReq";
+                  case XK_Sys_Req: // Unreachable?
+                     std::cout << "SysReq";
 
                   case XK_Control_L:
-                     cout << "Control L";
+                     std::cout << "Control L";
                      break;
                   case XK_Control_R:
-                     cout << "Control R";
+                     std::cout << "Control R";
                      break;
                   case XK_Shift_L:
-                     cout << "Shift L";
+                     std::cout << "Shift L";
                      break;
                   case XK_Shift_R:
-                     cout << "Shift R";
+                     std::cout << "Shift R";
                      break;
                   case XK_Alt_L:
-                     cout << "Alt L";
+                     std::cout << "Alt L";
                      break;
                   case XK_Alt_R:
-                     cout << "Alt R";
+                     std::cout << "Alt R";
                      break;
                   case XK_Super_L: // Window key
-                     cout << "Super L";
+                     std::cout << "Super L";
                      break;
                   case XK_Super_R: // Window key
-                     cout << "Super R";
+                     std::cout << "Super R";
                      break;
                   case XK_Hyper_L:
-                     cout << "Hyper L";
+                     std::cout << "Hyper L";
                      break;
                   case XK_Hyper_R:
-                     cout << "Hyper R";
+                     std::cout << "Hyper R";
                      break;
                   case XK_Meta_L:
-                     cout << "Meta L";
+                     std::cout << "Meta L";
                      break;
                   case XK_Meta_R:
-                     cout << "Meta R";
+                     std::cout << "Meta R";
                      break;
                   case XK_Caps_Lock:
-                     cout << "Caps Lock";
+                     std::cout << "Caps Lock";
                      break;
                   case XK_Num_Lock:
-                     cout << "Num Lock";
+                     std::cout << "Num Lock";
                      break;
                   case XK_Pause:
-                     cout << "Pause";
+                     std::cout << "Pause";
                      break;
                   case XK_Scroll_Lock:
-                     cout << "Scroll Lock";
+                     std::cout << "Scroll Lock";
                      break;
 
                   case XK_F1:
-                     cout << "F1";
+                     std::cout << "F1";
                      break;
                   case XK_F2:
-                     cout << "F2";
+                     std::cout << "F2";
                      break;
                   case XK_F3:
-                     cout << "F3";
+                     std::cout << "F3";
                      break;
                   case XK_F4:
-                     cout << "F4";
+                     std::cout << "F4";
                      break;
                   case XK_F5:
-                     cout << "F5";
+                     std::cout << "F5";
                      break;
                   case XK_F6:
-                     cout << "F6";
+                     std::cout << "F6";
                      break;
                   case XK_F7:
-                     cout << "F7";
+                     std::cout << "F7";
                      break;
                   case XK_F8:
-                     cout << "F8";
+                     std::cout << "F8";
                      break;
                   case XK_F9:
-                     cout << "F9";
+                     std::cout << "F9";
                      break;
                   case XK_F10:
-                     cout << "F10";
+                     std::cout << "F10";
                      break;
                   case XK_F11:
-                     cout << "F11";
+                     std::cout << "F11";
                      break;
                   case XK_F12:
-                     cout << "F12";
+                     std::cout << "F12";
                      break;
                   case XK_F13:
-                     cout << "F13";
+                     std::cout << "F13";
                      break;
                   case XK_F14:
-                     cout << "F14";
+                     std::cout << "F14";
                      break;
                   case XK_F15:
-                     cout << "F15";
+                     std::cout << "F15";
                      break;
 
                   case XK_KP_Enter:
-                     cout << "Keypad Enter";
+                     std::cout << "Keypad Enter";
                      break;
                   case XK_KP_Delete:
-                     cout << "Keypad Delete";
+                     std::cout << "Keypad Delete";
                      break;
                   case XK_KP_Up:
-                     cout << "Keypad Up";
+                     std::cout << "Keypad Up";
                      break;
                   case XK_KP_Down:
-                     cout << "Keypad Down";
+                     std::cout << "Keypad Down";
                      break;
                   case XK_KP_Right:
-                     cout << "Keypad Right";
+                     std::cout << "Keypad Right";
                      break;
                   case XK_KP_Left:
-                     cout << "Keypad Left";
+                     std::cout << "Keypad Left";
                      break;
                   case XK_KP_Home:
-                     cout << "Keypad Home";
+                     std::cout << "Keypad Home";
                      break;
                   case XK_KP_Prior:
-                     cout << "Keypad Page Up";
+                     std::cout << "Keypad Page Up";
                      break;
                   case XK_KP_Next:
-                     cout << "Keypad Page down";
+                     std::cout << "Keypad Page down";
                      break;
                   case XK_KP_Begin:
-                     cout << "Keypad Begin";
+                     std::cout << "Keypad Begin";
                      break;
                   case XK_KP_End:
-                     cout << "Keypad End";
+                     std::cout << "Keypad End";
                      break;
                   case XK_KP_Insert:
-                     cout << "Keypad Insert";
+                     std::cout << "Keypad Insert";
                      break;
                   case XK_KP_Equal:
-                     cout << "Keypad Equal";
+                     std::cout << "Keypad Equal";
                      break;
                   case XK_KP_Multiply:
-                     cout << "Keypad *";
+                     std::cout << "Keypad *";
                      break;
                   case XK_KP_Divide:
-                     cout << "Keypad /";
+                     std::cout << "Keypad /";
                      break;
                   case XK_KP_Add:
-                     cout << "Keypad +";
+                     std::cout << "Keypad +";
                      break;
                   case XK_KP_Subtract:
-                     cout << "Keypad -";
+                     std::cout << "Keypad -";
                      break;
                   case XK_KP_Decimal:
-                     cout << "Keypad .";
+                     std::cout << "Keypad .";
                      break;
                   case XK_KP_0:
-                     cout << "Keypad 0";
+                     std::cout << "Keypad 0";
                      break;
                   case XK_KP_1:
-                     cout << "Keypad 1";
+                     std::cout << "Keypad 1";
                      break;
                   case XK_KP_2:
-                     cout << "Keypad 2";
+                     std::cout << "Keypad 2";
                      break;
                   case XK_KP_3:
-                     cout << "Keypad 3";
+                     std::cout << "Keypad 3";
                      break;
                   case XK_KP_4:
-                     cout << "Keypad 4";
+                     std::cout << "Keypad 4";
                      break;
                   case XK_KP_5:
-                     cout << "Keypad 5";
+                     std::cout << "Keypad 5";
                      break;
                   case XK_KP_6:
-                     cout << "Keypad 6";
+                     std::cout << "Keypad 6";
                      break;
                   case XK_KP_7:
-                     cout << "Keypad 7";
+                     std::cout << "Keypad 7";
                      break;
                   case XK_KP_8:
-                     cout << "Keypad 8";
+                     std::cout << "Keypad 8";
                      break;
                   case XK_KP_9:
-                     cout << "Keypad 9";
+                     std::cout << "Keypad 9";
                      break;
 
                   default:
-                     cout << "unrecognized key #" << hex << (int) keySym;
-		     /* 1008ff19 Mail
-		      * 1008ff2e Home
-		      * 1008ff30 Star
-		      *
-		      * 1008ff31 Pause/Play
-		      * 1008ff16 Rewind
-		      * 1008ff17 Fast Forward
-		      * 1008ff2c Stop
-		      *
-		      * 1008ff11 Volume Down
-		      * 1008ff13 Volume Up
-		      * 1008ff12 Mute
-		      *
-		      * 1008ff32 Music
-		      * 1008ff33 Screen/Terminal
-		      * 1008ff1d Menu
-		      */
+                     std::cout << "unrecognized key #" << std::hex 
+                           << (int) keySym;
+                     /* 1008ff19 Mail
+                      * 1008ff2e Home
+                      * 1008ff30 Star
+                      *
+                      * 1008ff31 Pause/Play
+                      * 1008ff16 Rewind
+                      * 1008ff17 Fast Forward
+                      * 1008ff2c Stop
+                      *
+                      * 1008ff11 Volume Down
+                      * 1008ff13 Volume Up
+                      * 1008ff12 Mute
+                      *
+                      * 1008ff32 Music
+                      * 1008ff33 Screen/Terminal
+                      * 1008ff1d Menu
+                      */
                      break;
                }
-               cout << ".\n";
+               std::cout << ".\n";
             }
             break;
 
-            /*
+         /*
          case KeyRelease:
             chars = XLookupString( &event.xkey, keyBuffer, BUFFER_SIZE, 
                   &keySym, &composeStatus );
             if (chars > 0) {
-               cout << "Released \"" << keyBuffer[0] << ".\n";
+               std::cout << "Released \"" << keyBuffer[0] << ".\n";
             } else {
-               cout << "Released a non-ASCII key.\n";
+               std::cout << "Released a non-ASCII key.\n";
             }
             if (keyBuffer[0] == 'q') {
                finished = true;
             }
             break;
-            */
+          */
       }
    }
 
@@ -542,8 +541,8 @@ void scribble( XXGC *gc, XXColor *color1, XXColor *color2 ) {
    gc->getWindow()->getDisplay()->flush();
 }
 
-string modState( unsigned int eventState ) {
-   string out="[";
+std::string modState( unsigned int eventState ) {
+   std::string out="[";
    bool started = false;
 
    if (eventState & ShiftMask) {
@@ -642,7 +641,7 @@ extern "C" int fatalErrorHandler( Display *display ) {
 }
 
 extern "C" void signalHandler( int theSignal ) {
-   string signalName;
+   std::string signalName;
 
    switch( theSignal ) {
       case SIGABRT:
@@ -656,6 +655,6 @@ extern "C" void signalHandler( int theSignal ) {
          break;
    }
 
-   cerr << "Caught " << signalName << " signal.\n";
+   std::cerr << "Caught " << signalName << " signal.\n";
    finished = true;
 }

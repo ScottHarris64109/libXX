@@ -41,10 +41,10 @@ XXFont::~XXFont( ) {
 
 XXFont::XXFont( XXDisplay *display, const char *fontName ) : display(display) {
    font = XLoadQueryFont( display->xDisplay(), fontName );
-   name = string( fontName );
+   name = std::string( fontName );
 }
 
-XXFont::XXFont( XXDisplay *display, const string name ) : 
+XXFont::XXFont( XXDisplay *display, const std::string name ) : 
    display( display ), name( name ) {
    font = XLoadQueryFont( display->xDisplay(), name.c_str() );
 }

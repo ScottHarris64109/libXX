@@ -114,12 +114,12 @@ void XXGC::fillArc( int x, int y, int width, int height,
          x, y, width, height, angle( start ), angle( sweep ) );
 }
 
-void XXGC::drawText( int x, int y, const string text ) {
+void XXGC::drawText( int x, int y, const std::string text ) {
    XDrawString( window->getDisplay()->xDisplay(), target, gc, x, y,
         text.c_str(), text.length() );
 }
 
-void XXGC::fillText( int x, int y, const string text ) {
+void XXGC::fillText( int x, int y, const std::string text ) {
    XDrawImageString( window->getDisplay()->xDisplay(), target, gc, x, y,
         text.c_str(), text.length() );
 }

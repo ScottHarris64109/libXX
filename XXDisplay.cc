@@ -20,6 +20,7 @@
 #include <string.h>
 #include <string>
 #include <stdexcept>
+#include <iostream>
 
 #include "XXDisplay.hh"
 #include "XXWindow.hh"
@@ -86,7 +87,7 @@ XXDisplay::XXDisplay( const char *displayName ) {
  *  display (typically "localhost:0.0") will be connected.
  */
 
-XXDisplay::XXDisplay( string displayName ) {
+XXDisplay::XXDisplay( std::string displayName ) {
    this->name_ = (displayName == "") ? NULL: displayName.c_str();
    init();
 }
@@ -167,8 +168,8 @@ int XXDisplay::countPendingEvents( bool flushQueue ) {
  * @return the X11 display name.
  */
 
-string XXDisplay::name( void ) const {
-   string output( XDisplayName( this->name_ ) );
+std::string XXDisplay::name( void ) const {
+   std::string output( XDisplayName( this->name_ ) );
    return output;
 }
 
@@ -178,8 +179,8 @@ string XXDisplay::name( void ) const {
  * @return the X11 vendor name.
  */
 
-string XXDisplay::vendorName( void ) const {
-   string output( ServerVendor( display ) );
+std::string XXDisplay::vendorName( void ) const {
+   std::string output( ServerVendor( display ) );
    return output;
 }
 
@@ -312,6 +313,6 @@ XXColor *XXDisplay::getColor( const char *name, int screen ) {
  * @return the XXColor or NULL
  */
 
-XXColor *XXDisplay::getColor( const string name, int screen ) {
+XXColor *XXDisplay::getColor( const std::string name, int screen ) {
    return this->getColor( name.c_str(), screen );
 }

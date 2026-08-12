@@ -17,7 +17,7 @@ class XXFont {
 private:
    XXDisplay *display;
    XFontStruct *font;
-   string name;
+   std::string name;
 
 protected:
 
@@ -28,7 +28,7 @@ public:
    virtual ~XXFont();
 
    /// Look up a font by name.
-   XXFont( XXDisplay *display, const string fontName );
+   XXFont( XXDisplay *display, const std::string fontName );
 
    /// Look up a font by name.
    XXFont( XXDisplay *display, const char *fontName );
@@ -36,7 +36,7 @@ public:
    //== Accessors ==============================================================
 
    /// Get the font name.
-   inline string getName( void ) const { return name; }
+   inline std::string getName( void ) const { return name; }
 
    /// Get the X11 font ID.
    inline Font getXFont( void ) const { return font->fid; }

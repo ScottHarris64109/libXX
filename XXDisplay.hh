@@ -10,10 +10,10 @@
 
 #include <string>
 #include <map>
+#include <ostream>
 #include <X11/Xlib.h>
 //#include <X11/Xutil.h>
 
-using namespace std;
 class XXWindow;
 class XXColor;
 
@@ -35,7 +35,9 @@ private:
    const char *name_;
    Display *display;
    XXWindow *rootWindow;
-   map<XID, XXWindow*> window_;
+   std::map<XID, XXWindow*> window_;
+   //std::ostream& err = std::cerr;
+   //std::ostream *err = &std::cerr;
 
    void init( void );
 
@@ -56,7 +58,7 @@ public:
    XXDisplay( const char *displayName );
 
    /// Create an XXDisplay for a named X server.
-   XXDisplay( string displayName );
+   XXDisplay( std::string displayName );
 
    /// Shut down the XXDisplay and release its resources.
    virtual ~XXDisplay();
@@ -67,10 +69,10 @@ public:
    inline Display *xDisplay( void ) { return display; }
 
    /// Get the name of the X server/display.
-   string name( void ) const;
+   std::string name( void ) const;
 
    /// Get the X server's vendor's name.
-   string vendorName( void ) const;
+   std::string vendorName( void ) const;
 
    /// Get the X server's release number.
    int vendorRelease( void ) const;
@@ -103,7 +105,7 @@ public:
    inline XXWindow *window(XID id) { return window_[id]; };
 
    /// Get a color by name.
-   XXColor *getColor( const string name, int screen=-1 );
+   XXColor *getColor( const std::string name, int screen=-1 );
 
    /// Get a color by name.
    XXColor *getColor( const char *name, int screen=-1 );
