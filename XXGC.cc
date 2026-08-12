@@ -35,26 +35,26 @@
 /**
  *  Destroy and deallocate a XXGC object.
  */
-XXGC::~XXGC( ) {
+XX::XXGC::~XXGC( ) {
    XFreeGC( window->getDisplay()->xDisplay(), gc );
 }
 
 /**
  * Create an XXGC for an XXWindow.
  */
-XXGC::XXGC( XXWindow *window ) : window( window ) {
+XX::XXGC::XXGC( XX::XXWindow *window ) : window( window ) {
    pixmap = NULL;
    target = window->getXID();
    gc = create();
 }
 
-XXGC::XXGC( XXPixMap *pixmap ) : pixmap( pixmap ) {
+XX::XXGC::XXGC( XX::XXPixMap *pixmap ) : pixmap( pixmap ) {
    window = pixmap->getWindow();
    target = pixmap->getXPixmap();
    gc = create();
 }
 
-GC XXGC::create( void ) {
+GC XX::XXGC::create( void ) {
    XGCValues settings;
    unsigned long mask = 0;
 
@@ -69,57 +69,57 @@ GC XXGC::create( void ) {
 
 //== Accessors ================================================================
 
-void XXGC::setForeground( XXColor *color ) {
+void XX::XXGC::setForeground( XX::XXColor *color ) {
    XSetForeground( window->getDisplay()->xDisplay(), gc, color->getPixel() );
 }
 
-void XXGC::setBackground( XXColor *color ) {
+void XX::XXGC::setBackground( XX::XXColor *color ) {
    XSetBackground( window->getDisplay()->xDisplay(), gc, color->getPixel() );
 }
 
-void XXGC::setFont( XXFont *font ) {
+void XX::XXGC::setFont( XX::XXFont *font ) {
    XSetFont( window->getDisplay()->xDisplay(), gc, font->getXFont() );
 }
 
 //== Operations ===============================================================
 
-void XXGC::drawPoint( int x, int y ) {
+void XX::XXGC::drawPoint( int x, int y ) {
    XDrawPoint( window->getDisplay()->xDisplay(), target, gc, x, y );
 }
 
-void XXGC::drawLine( int x1, int y1, int x2, int y2 ) {
+void XX::XXGC::drawLine( int x1, int y1, int x2, int y2 ) {
    XDrawLine( window->getDisplay()->xDisplay(), target, gc, 
          x1, y1, x2, y2 );
 }
 
-void XXGC::drawRectangle( int x, int y, int width, int height ) {
+void XX::XXGC::drawRectangle( int x, int y, int width, int height ) {
    XDrawRectangle( window->getDisplay()->xDisplay(), target, gc, 
          x, y, width, height );
 }
 
-void XXGC::fillRectangle( int x, int y, int width, int height ) {
+void XX::XXGC::fillRectangle( int x, int y, int width, int height ) {
    XFillRectangle( window->getDisplay()->xDisplay(), target, gc, 
          x, y, width, height );
 }
 
-void XXGC::drawArc( int x, int y, int width, int height, 
+void XX::XXGC::drawArc( int x, int y, int width, int height, 
       double start, double sweep ) {
    XDrawArc( window->getDisplay()->xDisplay(), target, gc, 
          x, y, width, height, angle( start ), angle( sweep ) );
 }
 
-void XXGC::fillArc( int x, int y, int width, int height, 
+void XX::XXGC::fillArc( int x, int y, int width, int height, 
       double start, double sweep ) {
    XFillArc( window->getDisplay()->xDisplay(), target, gc, 
          x, y, width, height, angle( start ), angle( sweep ) );
 }
 
-void XXGC::drawText( int x, int y, const std::string text ) {
+void XX::XXGC::drawText( int x, int y, const std::string text ) {
    XDrawString( window->getDisplay()->xDisplay(), target, gc, x, y,
         text.c_str(), text.length() );
 }
 
-void XXGC::fillText( int x, int y, const std::string text ) {
+void XX::XXGC::fillText( int x, int y, const std::string text ) {
    XDrawImageString( window->getDisplay()->xDisplay(), target, gc, x, y,
         text.c_str(), text.length() );
 }

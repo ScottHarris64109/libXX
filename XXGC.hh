@@ -12,6 +12,8 @@
 #include "XXPixMap.hh"
 #include "XXFont.hh"
 
+namespace XX {
+
 /**
  * @brief XXGC encapsulates an X11 GC (Graphics Context).
  */
@@ -19,8 +21,8 @@
 class XXGC {
 
 private:
-   XXWindow  *window;
-   XXPixMap  *pixmap;
+   XX::XXWindow  *window;
+   XX::XXPixMap  *pixmap;
    XID       target;
    GC        gc;
 
@@ -39,26 +41,26 @@ public:
    virtual ~XXGC();
 
    /// Get a new XXGC for the XXWindow.
-   XXGC( XXWindow *window );
+   XXGC( XX::XXWindow *window );
 
    /// Get a new XXGC for the XXPixmap.
-   XXGC( XXPixMap *pixmap );
+   XXGC( XX::XXPixMap *pixmap );
 
    //== Accessors ==============================================================
 
    /// Get the XXWindow that this XXGC draws in.
-   inline XXWindow *getWindow( void ) const {
+   inline XX::XXWindow *getWindow( void ) const {
       return window;
    }
 
    /// Set the foreground color.
-   void setForeground( XXColor *color );
+   void setForeground( XX::XXColor *color );
 
    /// Set the background color.
-   void setBackground( XXColor *color );
+   void setBackground( XX::XXColor *color );
 
    /// Set the font for drawing text.
-   void setFont( XXFont *font );
+   void setFont( XX::XXFont *font );
 
    //== Operations =============================================================
 
@@ -87,6 +89,8 @@ public:
 
    /// Draw text and fill in its background.
    void fillText( int x, int y, const std::string text );
-};
+
+}; // class
+}; // namespace
 
 #endif /* XXGC_HH_ */

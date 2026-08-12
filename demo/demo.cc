@@ -56,9 +56,9 @@ bool finished = false;
 std::multimap<std::string,std::string> parse_args( int argc, char *argv[] );
 std::string getArg( const std::multimap<std::string,std::string> &arg, 
       std::string key, int index=0, std::string defaultValue = "" );
-void scribble( XXGC *gc, XXColor *color1, XXColor *color2 );
-void loop( XXDisplay *display, XXWindow *window, XXGC *gc, XXFont *font, 
-      XXColor *fg1, XXColor *fg2 );
+void scribble( XX::XXGC *gc, XX::XXColor *color1, XX::XXColor *color2 );
+void loop( XX::XXDisplay *display, XX::XXWindow *window, XX::XXGC *gc, XX::XXFont *font, 
+      XX::XXColor *fg1, XX::XXColor *fg2 );
 std::string modState( unsigned int eventState );
 extern "C" int criticalErrorHandler( Display *display, XErrorEvent *error );
 extern "C" int fatalErrorHandler( Display *display );
@@ -70,13 +70,13 @@ int main( int argc, char *argv[] ) {
    std::string fg1name = getArg( arg, "-foreground", 0, "black" );
    std::string fg2name = getArg( arg, "-foreground", 1, "red" );
    std::string bgname  = getArg( arg, "-background", 0, "white" );
-   XXDisplay *display;
-   XXWindow *window;
-   XXColor *fg1   = NULL;
-   XXColor *fg2 = NULL;
-   XXColor *background = NULL;
-   XXGC *gc;
-   XXFont *font;
+   XX::XXDisplay *display;
+   XX::XXWindow *window;
+   XX::XXColor *fg1   = NULL;
+   XX::XXColor *fg2 = NULL;
+   XX::XXColor *background = NULL;
+   XX::XXGC *gc;
+   XX::XXFont *font;
 
    signal( SIGABRT, signalHandler );
    signal( SIGTERM, signalHandler );
@@ -87,7 +87,7 @@ int main( int argc, char *argv[] ) {
       "This is free software, and you are welcome to redistribute it \n"
       "under certain conditions.  (See the GNU GPL version 3 for details).\n\n";
 
-   display = new XXDisplay( displayName );
+   display = new XX::XXDisplay( displayName );
    std::cout << "Got display.\n";
    std::cout << display->vendorName() << " | " << display->name() <<"\n";
    std::cout << display->screenCount() << " screens.\n";
@@ -107,12 +107,12 @@ int main( int argc, char *argv[] ) {
    fg2 = display->getColor( fg2name );
    std::cout << "Got colors.\n";
 
-   window = new XXWindow( display, 500, 100, 500, 500, background );
+   window = new XX::XXWindow( display, 500, 100, 500, 500, background );
    std::cout << "Got window.\n";
 
-   gc = new XXGC( window );
+   gc = new XX::XXGC( window );
 
-   font = new XXFont( display, "variable" );
+   font = new XX::XXFont( display, "variable" );
    gc->setFont( font );
 
    window->open( true );
@@ -175,8 +175,8 @@ for (std::pair<iter, iter> range(myMap.equal_range(myKey));
 */
 }
 
-void loop( XXDisplay *display, XXWindow *window, XXGC *gc, XXFont *font, 
-      XXColor *fg1, XXColor *fg2 ) {
+void loop( XX::XXDisplay *display, XX::XXWindow *window, XX::XXGC *gc, XX::XXFont *font, 
+      XX::XXColor *fg1, XX::XXColor *fg2 ) {
    XEvent event;
    Atom windowClosed;
    char keyBuffer[ BUFFER_SIZE+1 ];
@@ -528,7 +528,7 @@ void loop( XXDisplay *display, XXWindow *window, XXGC *gc, XXFont *font,
 
 }
 
-void scribble( XXGC *gc, XXColor *color1, XXColor *color2 ) {
+void scribble( XX::XXGC *gc, XX::XXColor *color1, XX::XXColor *color2 ) {
    gc->setForeground( color1 );
    gc->drawLine( 10, 10, 50, 50 );
    gc->drawRectangle( 10, 60, 40, 40 );

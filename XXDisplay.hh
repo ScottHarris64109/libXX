@@ -12,10 +12,10 @@
 #include <map>
 #include <ostream>
 #include <X11/Xlib.h>
-//#include <X11/Xutil.h>
 
-class XXWindow;
-class XXColor;
+namespace XX {
+  class XXWindow;
+  class XXColor;
 
 /**
  * @brief XXDisplay is an X11 Display object.  
@@ -128,6 +128,7 @@ public:
    /// Return the number of XEvents waiting to be processed.
    int countPendingEvents( bool flushQueue = true );
 
-};
+}; // class
+}; // namespace
 
 #endif /* XXDISPLAY_HH_ */

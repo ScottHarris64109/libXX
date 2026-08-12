@@ -31,7 +31,7 @@
  *  Destroy and deallocate a XXFont object.
  */
 
-XXFont::~XXFont( ) {
+XX::XXFont::~XXFont( ) {
    XFreeFont( this->display->xDisplay(), this->font );
 }
 
@@ -39,12 +39,12 @@ XXFont::~XXFont( ) {
  *  Get the named XXFont from the Display.
  */
 
-XXFont::XXFont( XXDisplay *display, const char *fontName ) : display(display) {
+XX::XXFont::XXFont( XX::XXDisplay *display, const char *fontName ) : display(display) {
    font = XLoadQueryFont( display->xDisplay(), fontName );
    name = std::string( fontName );
 }
 
-XXFont::XXFont( XXDisplay *display, const std::string name ) : 
+XX::XXFont::XXFont( XX::XXDisplay *display, const std::string name ) : 
    display( display ), name( name ) {
    font = XLoadQueryFont( display->xDisplay(), name.c_str() );
 }

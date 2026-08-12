@@ -8,6 +8,8 @@
 #include <X11/Xutil.h>
 #include "XXDisplay.hh"
 
+namespace XX {
+
 /**
  * @brief XXFont encapsulates an X11 XFontStruct.
  */
@@ -15,7 +17,7 @@
 class XXFont {
 
 private:
-   XXDisplay *display;
+   XX::XXDisplay *display;
    XFontStruct *font;
    std::string name;
 
@@ -28,10 +30,10 @@ public:
    virtual ~XXFont();
 
    /// Look up a font by name.
-   XXFont( XXDisplay *display, const std::string fontName );
+   XXFont( XX::XXDisplay *display, const std::string fontName );
 
    /// Look up a font by name.
-   XXFont( XXDisplay *display, const char *fontName );
+   XXFont( XX::XXDisplay *display, const char *fontName );
 
    //== Accessors ==============================================================
 
@@ -44,6 +46,7 @@ public:
    //== Operations =============================================================
 
 
-};
+}; // class
+}; // namespace
 
 #endif /* XXFONT_HH_ */

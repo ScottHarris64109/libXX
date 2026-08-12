@@ -9,10 +9,7 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 
-class XXDisplay;
-class XXWindow;
-class XXGC;
-
+namespace XX {
 /**
  * @brief XXColor is a 24-bit color for the XX library.
  */
@@ -86,6 +83,7 @@ public:
    /// Set the blue component in the RGB color model.
    void setBlue( unsigned int value );
 
-};
+}; // class
+}; // namespace
 
 #endif /* XXCOLOR_HH_ */

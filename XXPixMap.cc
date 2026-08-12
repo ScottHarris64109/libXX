@@ -32,21 +32,21 @@
 /**
  *  Destroy and deallocate a XXPixMap object.
  */
-XXPixMap::~XXPixMap( ) {
+XX::XXPixMap::~XXPixMap( ) {
    XFreePixmap( window->getDisplay()->xDisplay(), id );
 }
 
 /**
  * Create an XXPixMap for an XXWindow.
  */
-XXPixMap::XXPixMap( XXWindow *window, int width, int height ) : 
+XX::XXPixMap::XXPixMap( XX::XXWindow *window, int width, int height ) : 
          window( window ), width( width ), height( height ) {
    id = XCreatePixmap( window->getDisplay()->xDisplay(),
          window->getXID(), width, height, window->getColorDepth() );
    depth = window->getColorDepth();
 }
 
-XXPixMap::XXPixMap( XXWindow *window, int width, int height, 
+XX::XXPixMap::XXPixMap( XX::XXWindow *window, int width, int height, 
      const char *bitMap /* width*height/8 */ ) : 
          window( window ), width( width ), height( height ) {
    id = XCreateBitmapFromData( window->getDisplay()->xDisplay(),

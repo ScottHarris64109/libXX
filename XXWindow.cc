@@ -29,7 +29,7 @@
  *  Destroy and deallocate a XXWindow object.
  */
 
-XXWindow::~XXWindow( ) {
+XX::XXWindow::~XXWindow( ) {
    this->display->removeWindow( this );
    XDestroyWindow( this->display->xDisplay(), this->getXID() );
 }
@@ -38,18 +38,18 @@ XXWindow::~XXWindow( ) {
  *  Create the root XXWindow for an XXDisplay.
  */
 
-XXWindow::XXWindow( ) {
+XX::XXWindow::XXWindow( ) {
    parent = NULL;
    display = NULL;
    is_open = false;
-   //background = new XXColor( 0xff, 0xff, 0xff );
+   //background = new XX::XXColor( 0xff, 0xff, 0xff );
 }
 
 /**
  *  Make this the root XXWindow for an XXDisplay.
  */
 
-void XXWindow::makeRoot( XXDisplay* display, int screen ) {
+void XX::XXWindow::makeRoot( XX::XXDisplay* display, int screen ) {
    this->display = display;
    this->screen = screen;
    parent = NULL;
@@ -104,9 +104,9 @@ XXWindow::XXWindow( XXWindow *parent,
 }
 */
 
-XXWindow::XXWindow( XXDisplay *display, int screen,
-      int originX, int originY, int width, int height, XXColor *background,
-      int borderWidth, XXColor *border, bool overrideRedirect ) :
+XX::XXWindow::XXWindow( XX::XXDisplay *display, int screen,
+      int originX, int originY, int width, int height, XX::XXColor *background,
+      int borderWidth, XX::XXColor *border, bool overrideRedirect ) :
             display( display ), screen( screen ), 
             originX( originX ), originY( originY ), 
             width( width ), height( height ), background( background ),
@@ -116,9 +116,9 @@ XXWindow::XXWindow( XXDisplay *display, int screen,
    initialize( overrideRedirect );
 }
 
-XXWindow::XXWindow( XXDisplay *display, 
-      int originX, int originY, int width, int height, XXColor *background,
-      int borderWidth, XXColor *border, bool overrideRedirect ) :
+XX::XXWindow::XXWindow( XX::XXDisplay *display, 
+      int originX, int originY, int width, int height, XX::XXColor *background,
+      int borderWidth, XX::XXColor *border, bool overrideRedirect ) :
             display( display ), originX( originX ), originY( originY ), 
             width( width ), height( height ), background( background ),
             borderWidth( borderWidth ), border( border ) {
@@ -128,9 +128,9 @@ XXWindow::XXWindow( XXDisplay *display,
    initialize( overrideRedirect );
 }
 
-XXWindow::XXWindow( XXWindow *parent, 
-      int originX, int originY, int width, int height, XXColor *background,
-      int borderWidth, XXColor *border, bool overrideRedirect ) :
+XX::XXWindow::XXWindow( XX::XXWindow *parent, 
+      int originX, int originY, int width, int height, XX::XXColor *background,
+      int borderWidth, XX::XXColor *border, bool overrideRedirect ) :
             parent( parent ), originX( originX ), originY( originY ), 
             width( width ), height( height ), background( background ),
             borderWidth( borderWidth ), border( border ) {
@@ -140,7 +140,7 @@ XXWindow::XXWindow( XXWindow *parent,
    initialize( overrideRedirect );
 }
 
-void XXWindow::initialize( bool overrideRedirect ) {
+void XX::XXWindow::initialize( bool overrideRedirect ) {
    XSetWindowAttributes attributes;
    unsigned long        mask = 0;
 
@@ -175,7 +175,7 @@ void XXWindow::initialize( bool overrideRedirect ) {
 /**
  * Get the X11 Atom needed to trap the close event for this window.
  */
-Atom XXWindow::getCloseAtom() {
+Atom XX::XXWindow::getCloseAtom() {
    Atom closeAtom=XInternAtom(display->xDisplay(), "WM_DELETE_WINDOW", True);
    XSetWMProtocols(display->xDisplay(), this->getXID(), &closeAtom, 1);
    return closeAtom;
@@ -183,7 +183,7 @@ Atom XXWindow::getCloseAtom() {
 
 //== Operations ===============================================================
 
-void XXWindow::open( bool immediately ) {
+void XX::XXWindow::open( bool immediately ) {
    XMapWindow( display->xDisplay(), getXID() );
    is_open = true;
    if (immediately) {
@@ -191,7 +191,7 @@ void XXWindow::open( bool immediately ) {
    }
 }
 
-void XXWindow::close( bool immediately ) {
+void XX::XXWindow::close( bool immediately ) {
    XUnmapWindow( display->xDisplay(), getXID() );
    is_open = false;
    if (immediately) {
@@ -199,12 +199,12 @@ void XXWindow::close( bool immediately ) {
    }
 }
 
-void XXWindow::listenFor( unsigned long events ) {
+void XX::XXWindow::listenFor( unsigned long events ) {
    eventMask = events;
    XSelectInput( display->xDisplay(), getXID(), events );
 }
 
-XEvent *XXWindow::getNextEvent( XEvent *event, bool block ) {
+XEvent *XX::XXWindow::getNextEvent( XEvent *event, bool block ) {
    if (block) {
       XWindowEvent( display->xDisplay(), getXID(), eventMask, event );
    } else if (!XCheckWindowEvent( display->xDisplay(), getXID(), 
@@ -214,7 +214,7 @@ XEvent *XXWindow::getNextEvent( XEvent *event, bool block ) {
    return event;
 }
 
-XEvent *XXWindow::getNextEvent( XEvent *event, unsigned long eventTypes, 
+XEvent *XX::XXWindow::getNextEvent( XEvent *event, unsigned long eventTypes, 
       bool block ) {
    if (block) {
       XWindowEvent( display->xDisplay(), getXID(), eventTypes, event );

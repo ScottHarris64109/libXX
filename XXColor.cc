@@ -24,18 +24,14 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 
-#include "XXDisplay.hh"
-#include "XXWindow.hh"
-#include "XXGC.hh"
-
 #include "XXColor.hh"
 
 //== Constructors =============================================================
 
-XXColor::~XXColor( ) {
+XX::XXColor::~XXColor( ) {
 }
 
-XXColor::XXColor( unsigned int red, unsigned int green, unsigned int blue ) {
+XX::XXColor::XXColor( unsigned int red, unsigned int green, unsigned int blue ) {
    setRed( red );
    setGreen( green );
    setBlue( blue );
@@ -43,14 +39,14 @@ XXColor::XXColor( unsigned int red, unsigned int green, unsigned int blue ) {
 
 //== Accessors ================================================================
 
-void XXColor::setRed( unsigned int value ) {
+void XX::XXColor::setRed( unsigned int value ) {
    red = value % 256;
 }
 
-void XXColor::setGreen( unsigned int value ) {
+void XX::XXColor::setGreen( unsigned int value ) {
    green = value % 256;
 }
 
-void XXColor::setBlue( unsigned int value ) {
+void XX::XXColor::setBlue( unsigned int value ) {
    blue = value % 256;
 }
