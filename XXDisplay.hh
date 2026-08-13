@@ -17,6 +17,10 @@ namespace XX {
   class XXWindow;
   class XXColor;
 
+  static bool errorHandlersHaveBeenSet = false;
+  extern "C" int criticalErrorHandler( ::Display *display, ::XErrorEvent *error );
+  extern "C" int fatalErrorHandler( ::Display *display );
+
 /**
  * @brief XXDisplay is an X11 Display object.  
  * In hardware terms it represents a display card driving at least one 

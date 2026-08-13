@@ -26,6 +26,8 @@
 #include "XXWindow.hh"
 #include "XXColor.hh"
 
+#define BUFFER_SIZE 255
+
 //== Constructors =============================================================
 
 /**
@@ -52,11 +54,36 @@ XX::XXDisplay::~XXDisplay( ) {
  */
 
 void XX::XXDisplay::init( void ) {
+   if (!XX::errorHandlersHaveBeenSet) {
+      XSetErrorHandler( XX::criticalErrorHandler );
+      XSetIOErrorHandler( XX::fatalErrorHandler );
+
+      XX::errorHandlersHaveBeenSet = true;
+   }
    display = XOpenDisplay( this->name_ );
    rootWindow = new XX::XXWindow[ this->screenCount() ];
    for (int screen = 0; screen < this->screenCount(); screen++) {
       rootWindow[ screen ].makeRoot( this, screen );
    }
+}
+
+extern "C" int XX::criticalErrorHandler( ::Display *display, ::XErrorEvent *error ) {
+   char text[ BUFFER_SIZE+1 ];
+
+   XGetErrorText( display, error->error_code, text, BUFFER_SIZE );
+
+   fprintf( stderr, "X11 error:  %s\n", text );
+   fprintf( stderr, "   Request Code: %d.%d   Error Code: %d\n", 
+         error->request_code, error->minor_code, error->error_code );
+   fprintf( stderr, "   Resource ID: %ld on display %s.\n", 
+         error->resourceid, DisplayString( display ) );
+   return 0;
+}
+
+extern "C" int XX::fatalErrorHandler( ::Display *display ) {
+   fprintf( stderr, "X Server failed for display %s\n", 
+         DisplayString( display ) );
+   exit( EXIT_FAILURE );
 }
 
 /**

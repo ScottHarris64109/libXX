@@ -60,8 +60,6 @@ void scribble( XX::XXGC *gc, XX::XXColor *color1, XX::XXColor *color2 );
 void loop( XX::XXDisplay *display, XX::XXWindow *window, XX::XXGC *gc, XX::XXFont *font, 
       XX::XXColor *fg1, XX::XXColor *fg2 );
 std::string modState( unsigned int eventState );
-extern "C" int criticalErrorHandler( Display *display, XErrorEvent *error );
-extern "C" int fatalErrorHandler( Display *display );
 extern "C" void signalHandler( int theSignal );
 
 int main( int argc, char *argv[] ) {
@@ -97,9 +95,6 @@ int main( int argc, char *argv[] ) {
          << " x " << display->height( screen ) 
          << " x " << display->colorDepth( screen ) << "\n";
    }
-
-   XSetErrorHandler( criticalErrorHandler );
-   XSetIOErrorHandler( fatalErrorHandler );
 
    std::cout << "Getting colors.\n";
    background = display->getColor( bgname );
@@ -619,25 +614,6 @@ std::string modState( unsigned int eventState ) {
    }
 
    return out;
-}
-
-extern "C" int criticalErrorHandler( Display *display, XErrorEvent *error ) {
-   char text[ BUFFER_SIZE+1 ];
-
-   XGetErrorText( display, error->error_code, text, BUFFER_SIZE );
-
-   fprintf( stderr, "X11 error:  %s\n", text );
-   fprintf( stderr, "   Request Code: %d.%d   Error Code: %d\n", 
-         error->request_code, error->minor_code, error->error_code );
-   fprintf( stderr, "   Resource ID: %ld on display %s.\n", 
-         error->resourceid, DisplayString( display ) );
-   return 0;
-}
-
-extern "C" int fatalErrorHandler( Display *display ) {
-   fprintf( stderr, "X Server failed for display %s\n", 
-         DisplayString( display ) );
-   exit( EXIT_FAILURE );
 }
 
 extern "C" void signalHandler( int theSignal ) {
