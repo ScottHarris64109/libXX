@@ -14,15 +14,15 @@
 #include <X11/Xlib.h>
 
 namespace XX {
-  class XXWindow;
-  class XXColor;
+  class Window;
+  class Color;
 
   static bool errorHandlersHaveBeenSet = false;
-  extern "C" int criticalErrorHandler( ::Display *display, ::XErrorEvent *error );
-  extern "C" int fatalErrorHandler( ::Display *display );
+  extern "C" int criticalErrorHandler( ::Display *xdisplay, ::XErrorEvent *error );
+  extern "C" int fatalErrorHandler( ::Display *xdisplay );
 
 /**
- * @brief XXDisplay is an X11 Display object.  
+ * @brief Display is an X11 Display object.  
  * In hardware terms it represents a display card driving at least one 
  * display screen.
  * <p>
@@ -30,16 +30,16 @@ namespace XX {
  * parameter is omitted or passed as -1, the default screen -- usually 0 --
  * will be used.
  */
-class XXDisplay {
-   // XXWindow constructors and destructors need access to 
+class Display {
+   // Window constructors and destructors need access to 
    // addWindow() and removeWindow().
-   friend class XXWindow;
+   friend class Window;
 
 private:
    const char *name_;
-   Display *display;
-   XXWindow *rootWindow;
-   std::map<XID, XXWindow*> window_;
+   ::Display *xdisplay;
+   Window *rootWindow;
+   std::map<XID, Window*> window_;
    //std::ostream& err = std::cerr;
    //std::ostream *err = &std::cerr;
 
@@ -47,30 +47,30 @@ private:
 
    int validScreen( int screen ) const;
 
-   void addWindow( XXWindow *w );
-   void removeWindow( XXWindow *w );
+   void addWindow( Window *w );
+   void removeWindow( Window *w );
 
 protected:
 
 public:
    //== Constructors ===========================================================
 
-   /// Create an XXDisplay for the default X display.
-   XXDisplay();
+   /// Create a Display for the default X display.
+   Display();
 
-   /// Create an XXDisplay for a named X server.
-   XXDisplay( const char *displayName );
+   /// Create a Display for a named X server.
+   Display( const char *displayName );
 
-   /// Create an XXDisplay for a named X server.
-   XXDisplay( std::string displayName );
+   /// Create a Display for a named X server.
+   Display( std::string displayName );
 
-   /// Shut down the XXDisplay and release its resources.
-   virtual ~XXDisplay();
+   /// Shut down the Display and release its resources.
+   virtual ~Display();
 
    //== Accessors ==============================================================
 
-   /// Get the X11 Display pointer wrapped by this XXDisplay.
-   inline Display *xDisplay( void ) { return display; }
+   /// Get the X11 Display pointer wrapped by this Display.
+   inline ::Display *xDisplay( void ) const { return xdisplay; }
 
    /// Get the name of the X server/display.
    std::string name( void ) const;
@@ -102,17 +102,17 @@ public:
    /// Get the color depth (number of bit planes) supported by the screen.
    int colorDepth(int screen=-1) const;
 
-   /// Return the root XXWindow of the screen.
-   XXWindow *root(int screen=-1) const;
+   /// Return the root Window of the screen.
+   Window *root(int screen=-1) const;
 
-   /// Look up an XXWindow by its XID.
-   inline XXWindow *window(XID id) { return window_[id]; };
-
-   /// Get a color by name.
-   XXColor *getColor( const std::string name, int screen=-1 );
+   /// Look up a Window by its XID.
+   inline Window *window(XID id) { return window_[id]; };
 
    /// Get a color by name.
-   XXColor *getColor( const char *name, int screen=-1 );
+   Color *getColor( const std::string name, int screen=-1 );
+
+   /// Get a color by name.
+   Color *getColor( const char *name, int screen=-1 );
 
    //== Operations =============================================================
 

@@ -28,10 +28,10 @@
 
 //== Constructors =============================================================
 
-XX::XXColor::~XXColor( ) {
+XX::Color::~Color( ) {
 }
 
-XX::XXColor::XXColor( unsigned int red, unsigned int green, unsigned int blue ) {
+XX::Color::Color( unsigned int red, unsigned int green, unsigned int blue ) {
    setRed( red );
    setGreen( green );
    setBlue( blue );
@@ -39,14 +39,14 @@ XX::XXColor::XXColor( unsigned int red, unsigned int green, unsigned int blue ) 
 
 //== Accessors ================================================================
 
-void XX::XXColor::setRed( unsigned int value ) {
+void XX::Color::setRed( unsigned int value ) {
    red = value % 256;
 }
 
-void XX::XXColor::setGreen( unsigned int value ) {
+void XX::Color::setGreen( unsigned int value ) {
    green = value % 256;
 }
 
-void XX::XXColor::setBlue( unsigned int value ) {
+void XX::Color::setBlue( unsigned int value ) {
    blue = value % 256;
 }

@@ -11,13 +11,13 @@
 namespace XX {
 
 /**
- * @brief XXPixMap is a ...
+ * @brief PixMap is an object wrapper for an X11 PixMap.
  */
 
-class XXPixMap {
+class PixMap {
 
 private:
-   XX::XXWindow  *window;
+   XX::Window  *window;
    Pixmap     id;
    int        height;
    int        width;
@@ -28,14 +28,14 @@ protected:
 public:
    //== Constructors ===========================================================
 
-   virtual ~XXPixMap();
-   XXPixMap( XX::XXWindow *window, int width, int height );
-   XXPixMap( XX::XXWindow *window, int width, int height, const char *bitMap );
+   virtual ~PixMap();
+   PixMap( XX::Window *window, int width, int height );
+   PixMap( XX::Window *window, int width, int height, const char *bitMap );
 
    //== Accessors ==============================================================
 
    inline Pixmap getXPixmap( void ) const { return id; }
-   inline XX::XXWindow *getWindow( void ) const { return window; }
+   inline XX::Window *getWindow( void ) const { return window; }
    inline int getWidth( void ) const { return width; }
    inline int getHeight( void ) const { return height; }
    inline int getColorDepth( void ) const { return depth; }

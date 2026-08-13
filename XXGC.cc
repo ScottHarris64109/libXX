@@ -33,94 +33,94 @@
 //== Constructors =============================================================
 
 /**
- *  Destroy and deallocate a XXGC object.
+ *  Destroy and deallocate a GC object.
  */
-XX::XXGC::~XXGC( ) {
-   XFreeGC( window->getDisplay()->xDisplay(), gc );
+XX::GC::~GC( ) {
+   XFreeGC( window->getDisplay()->xDisplay(), xgc );
 }
 
 /**
- * Create an XXGC for an XXWindow.
+ * Create an GC for an Window.
  */
-XX::XXGC::XXGC( XX::XXWindow *window ) : window( window ) {
+XX::GC::GC( XX::Window *window ) : window( window ) {
    pixmap = NULL;
    target = window->getXID();
-   gc = create();
+   xgc = create();
 }
 
-XX::XXGC::XXGC( XX::XXPixMap *pixmap ) : pixmap( pixmap ) {
+XX::GC::GC( XX::PixMap *pixmap ) : pixmap( pixmap ) {
    window = pixmap->getWindow();
    target = pixmap->getXPixmap();
-   gc = create();
+   xgc = create();
 }
 
-GC XX::XXGC::create( void ) {
+::GC XX::GC::create( void ) {
    XGCValues settings;
    unsigned long mask = 0;
 
-   gc = XCreateGC( window->getDisplay()->xDisplay(), target, 
+   xgc = XCreateGC( window->getDisplay()->xDisplay(), target, 
          mask, &settings );
 
-   //TODO:  if (gc == 0) ...
+   //TODO:  if (xgc == 0) ...
 
    setBackground( window->getBackground() );
-   return gc;
+   return xgc;
 }
 
 //== Accessors ================================================================
 
-void XX::XXGC::setForeground( XX::XXColor *color ) {
-   XSetForeground( window->getDisplay()->xDisplay(), gc, color->getPixel() );
+void XX::GC::setForeground( XX::Color *color ) {
+   XSetForeground( window->getDisplay()->xDisplay(), xgc, color->getPixel() );
 }
 
-void XX::XXGC::setBackground( XX::XXColor *color ) {
-   XSetBackground( window->getDisplay()->xDisplay(), gc, color->getPixel() );
+void XX::GC::setBackground( XX::Color *color ) {
+   XSetBackground( window->getDisplay()->xDisplay(), xgc, color->getPixel() );
 }
 
-void XX::XXGC::setFont( XX::XXFont *font ) {
-   XSetFont( window->getDisplay()->xDisplay(), gc, font->getXFont() );
+void XX::GC::setFont( XX::Font *font ) {
+   XSetFont( window->getDisplay()->xDisplay(), xgc, font->getXFont() );
 }
 
 //== Operations ===============================================================
 
-void XX::XXGC::drawPoint( int x, int y ) {
-   XDrawPoint( window->getDisplay()->xDisplay(), target, gc, x, y );
+void XX::GC::drawPoint( int x, int y ) {
+   XDrawPoint( window->getDisplay()->xDisplay(), target, xgc, x, y );
 }
 
-void XX::XXGC::drawLine( int x1, int y1, int x2, int y2 ) {
-   XDrawLine( window->getDisplay()->xDisplay(), target, gc, 
+void XX::GC::drawLine( int x1, int y1, int x2, int y2 ) {
+   XDrawLine( window->getDisplay()->xDisplay(), target, xgc, 
          x1, y1, x2, y2 );
 }
 
-void XX::XXGC::drawRectangle( int x, int y, int width, int height ) {
-   XDrawRectangle( window->getDisplay()->xDisplay(), target, gc, 
+void XX::GC::drawRectangle( int x, int y, int width, int height ) {
+   XDrawRectangle( window->getDisplay()->xDisplay(), target, xgc, 
          x, y, width, height );
 }
 
-void XX::XXGC::fillRectangle( int x, int y, int width, int height ) {
-   XFillRectangle( window->getDisplay()->xDisplay(), target, gc, 
+void XX::GC::fillRectangle( int x, int y, int width, int height ) {
+   XFillRectangle( window->getDisplay()->xDisplay(), target, xgc, 
          x, y, width, height );
 }
 
-void XX::XXGC::drawArc( int x, int y, int width, int height, 
+void XX::GC::drawArc( int x, int y, int width, int height, 
       double start, double sweep ) {
-   XDrawArc( window->getDisplay()->xDisplay(), target, gc, 
+   XDrawArc( window->getDisplay()->xDisplay(), target, xgc, 
          x, y, width, height, angle( start ), angle( sweep ) );
 }
 
-void XX::XXGC::fillArc( int x, int y, int width, int height, 
+void XX::GC::fillArc( int x, int y, int width, int height, 
       double start, double sweep ) {
-   XFillArc( window->getDisplay()->xDisplay(), target, gc, 
+   XFillArc( window->getDisplay()->xDisplay(), target, xgc, 
          x, y, width, height, angle( start ), angle( sweep ) );
 }
 
-void XX::XXGC::drawText( int x, int y, const std::string text ) {
-   XDrawString( window->getDisplay()->xDisplay(), target, gc, x, y,
+void XX::GC::drawText( int x, int y, const std::string text ) {
+   XDrawString( window->getDisplay()->xDisplay(), target, xgc, x, y,
         text.c_str(), text.length() );
 }
 
-void XX::XXGC::fillText( int x, int y, const std::string text ) {
-   XDrawImageString( window->getDisplay()->xDisplay(), target, gc, x, y,
+void XX::GC::fillText( int x, int y, const std::string text ) {
+   XDrawImageString( window->getDisplay()->xDisplay(), target, xgc, x, y,
         text.c_str(), text.length() );
 }
 

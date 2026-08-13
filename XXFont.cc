@@ -28,23 +28,23 @@
 //== Constructors =============================================================
 
 /**
- *  Destroy and deallocate a XXFont object.
+ *  Destroy and deallocate a Font object.
  */
 
-XX::XXFont::~XXFont( ) {
-   XFreeFont( this->display->xDisplay(), this->font );
+XX::Font::~Font( ) {
+   XFreeFont( this->display->xDisplay(), this->xfont );
 }
 
 /**
- *  Get the named XXFont from the Display.
+ *  Get the named Font from the Display.
  */
 
-XX::XXFont::XXFont( XX::XXDisplay *display, const char *fontName ) : display(display) {
-   font = XLoadQueryFont( display->xDisplay(), fontName );
+XX::Font::Font( XX::Display *display, const char *fontName ) : display(display) {
+   xfont = XLoadQueryFont( display->xDisplay(), fontName );
    name = std::string( fontName );
 }
 
-XX::XXFont::XXFont( XX::XXDisplay *display, const std::string name ) : 
+XX::Font::Font( XX::Display *display, const std::string name ) : 
    display( display ), name( name ) {
-   font = XLoadQueryFont( display->xDisplay(), name.c_str() );
+   xfont = XLoadQueryFont( display->xDisplay(), name.c_str() );
 }

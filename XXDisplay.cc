@@ -31,12 +31,12 @@
 //== Constructors =============================================================
 
 /**
- *  Destroy and deallocate a XXDisplay object.
+ *  Destroy and deallocate a Display object.
  */
 
-XX::XXDisplay::~XXDisplay( ) {
-   if (display != NULL) {
-      XCloseDisplay( display );
+XX::Display::~Display( ) {
+   if (this->xdisplay != NULL) {
+      XCloseDisplay( this->xdisplay );
    }
 
    if (rootWindow != NULL) {
@@ -46,43 +46,44 @@ XX::XXDisplay::~XXDisplay( ) {
 }
 
 /**
- *  Initialize a XXDisplay object.  This is to be called by constructors only.
+ *  Initialize a Display object.  This is to be called by constructors only.
  *
  * @param x X.
  * @return output.
  * @throws Exception if problem.
  */
 
-void XX::XXDisplay::init( void ) {
+void XX::Display::init( void ) {
    if (!XX::errorHandlersHaveBeenSet) {
       XSetErrorHandler( XX::criticalErrorHandler );
       XSetIOErrorHandler( XX::fatalErrorHandler );
 
       XX::errorHandlersHaveBeenSet = true;
    }
-   display = XOpenDisplay( this->name_ );
-   rootWindow = new XX::XXWindow[ this->screenCount() ];
+   this->xdisplay = XOpenDisplay( this->name_ );
+   rootWindow = new XX::Window[ this->screenCount() ];
    for (int screen = 0; screen < this->screenCount(); screen++) {
       rootWindow[ screen ].makeRoot( this, screen );
    }
 }
 
-extern "C" int XX::criticalErrorHandler( ::Display *display, ::XErrorEvent *error ) {
+extern "C" int XX::criticalErrorHandler( ::Display *xdisplay, 
+      ::XErrorEvent *error ) {
    char text[ BUFFER_SIZE+1 ];
 
-   XGetErrorText( display, error->error_code, text, BUFFER_SIZE );
+   XGetErrorText( xdisplay, error->error_code, text, BUFFER_SIZE );
 
    fprintf( stderr, "X11 error:  %s\n", text );
    fprintf( stderr, "   Request Code: %d.%d   Error Code: %d\n", 
          error->request_code, error->minor_code, error->error_code );
    fprintf( stderr, "   Resource ID: %ld on display %s.\n", 
-         error->resourceid, DisplayString( display ) );
+         error->resourceid, DisplayString( xdisplay ) );
    return 0;
 }
 
-extern "C" int XX::fatalErrorHandler( ::Display *display ) {
+extern "C" int XX::fatalErrorHandler( ::Display *xdisplay ) {
    fprintf( stderr, "X Server failed for display %s\n", 
-         DisplayString( display ) );
+         DisplayString( xdisplay ) );
    exit( EXIT_FAILURE );
 }
 
@@ -90,7 +91,7 @@ extern "C" int XX::fatalErrorHandler( ::Display *display ) {
  *  Connect to the default X11 Display.
  */
 
-XX::XXDisplay::XXDisplay( ) {
+XX::Display::Display( ) {
    this->name_ = NULL;
    init();
 }
@@ -100,13 +101,13 @@ XX::XXDisplay::XXDisplay( ) {
  *  display (typically "localhost:0.0") will be connected.
  */
 
-XX::XXDisplay::XXDisplay( const char *displayName ) {
+XX::Display::Display( const char *displayName ) {
    if ((displayName != NULL) && (strlen(displayName) == 0)) {
       this->name_ = NULL;
    } else {
       this->name_ = displayName;
    }
-   init();
+   this->init();
 }
 
 /**
@@ -114,9 +115,9 @@ XX::XXDisplay::XXDisplay( const char *displayName ) {
  *  display (typically "localhost:0.0") will be connected.
  */
 
-XX::XXDisplay::XXDisplay( std::string displayName ) {
+XX::Display::Display( std::string displayName ) {
    this->name_ = (displayName == "") ? NULL: displayName.c_str();
-   init();
+   this->init();
 }
 
 //== Operations ===============================================================
@@ -126,7 +127,7 @@ XX::XXDisplay::XXDisplay( std::string displayName ) {
  *  If the screen number is -1, return the default screen number for 
  *  the display.
  */
-int XX::XXDisplay::validScreen( int screen ) const {
+int XX::Display::validScreen( int screen ) const {
    if (screen == -1) {
       return this->defaultScreen();
    }
@@ -142,14 +143,14 @@ int XX::XXDisplay::validScreen( int screen ) const {
 /**
  *  Flush the display.
  */
-void XX::XXDisplay::flush( void ) {
+void XX::Display::flush( void ) {
    XFlush( this->xDisplay() );
 }
 
 /**
  *  Get the next pending event, but do not remove it from the queue.
  */
-XEvent *XX::XXDisplay::peekNextEvent( XEvent *event ) {
+XEvent *XX::Display::peekNextEvent( XEvent *event ) {
    XPeekEvent( this->xDisplay(), event );
    return event;
 }
@@ -157,7 +158,7 @@ XEvent *XX::XXDisplay::peekNextEvent( XEvent *event ) {
 /**
  *  Get the next pending event.
  */
-XEvent *XX::XXDisplay::getNextEvent( XEvent *event, bool block ) {
+XEvent *XX::Display::getNextEvent( XEvent *event, bool block ) {
    if (!block && !countPendingEvents()) {
       return NULL;
    }
@@ -168,7 +169,7 @@ XEvent *XX::XXDisplay::getNextEvent( XEvent *event, bool block ) {
 /**
  *  Get the next event whose type is found in the mask.
  */
-XEvent *XX::XXDisplay::getNextEvent( XEvent *event, unsigned long eventTypes, 
+XEvent *XX::Display::getNextEvent( XEvent *event, unsigned long eventTypes, 
       bool block ) {
    if (block) {
       XMaskEvent( this->xDisplay(), eventTypes, event );
@@ -181,7 +182,7 @@ XEvent *XX::XXDisplay::getNextEvent( XEvent *event, unsigned long eventTypes,
 /**
  *  Get the number of pending events.
  */
-int XX::XXDisplay::countPendingEvents( bool flushQueue ) {
+int XX::Display::countPendingEvents( bool flushQueue ) {
    if (flushQueue) {
       flush();
    }
@@ -195,7 +196,7 @@ int XX::XXDisplay::countPendingEvents( bool flushQueue ) {
  * @return the X11 display name.
  */
 
-std::string XX::XXDisplay::name( void ) const {
+std::string XX::Display::name( void ) const {
    std::string output( XDisplayName( this->name_ ) );
    return output;
 }
@@ -206,8 +207,8 @@ std::string XX::XXDisplay::name( void ) const {
  * @return the X11 vendor name.
  */
 
-std::string XX::XXDisplay::vendorName( void ) const {
-   std::string output( ServerVendor( display ) );
+std::string XX::Display::vendorName( void ) const {
+   std::string output( ServerVendor( this->xDisplay() ) );
    return output;
 }
 
@@ -217,8 +218,8 @@ std::string XX::XXDisplay::vendorName( void ) const {
  * @return the X11 vendor release.
  */
 
-int XX::XXDisplay::vendorRelease( void ) const {
-   return VendorRelease( display );
+int XX::Display::vendorRelease( void ) const {
+   return VendorRelease( this->xDisplay() );
 }
 
 /**
@@ -227,8 +228,8 @@ int XX::XXDisplay::vendorRelease( void ) const {
  * @return the X11 protocol version.
  */
 
-int XX::XXDisplay::protocolVersion( void ) const {
-   return ProtocolVersion( display );
+int XX::Display::protocolVersion( void ) const {
+   return ProtocolVersion( this->xDisplay() );
 }
 
 /**
@@ -237,19 +238,8 @@ int XX::XXDisplay::protocolVersion( void ) const {
  * @return the X11 protocol revision.
  */
 
-int XX::XXDisplay::protocolRevision( void ) const {
-   return ProtocolRevision( display );
-}
-
-
-/**
- *  Return the value of the X11 protocol revision.
- *
- * @return the X11 protocol revision.
- */
-
-int XX::XXDisplay::defaultScreen( void ) const {
-   return DefaultScreen( display );
+int XX::Display::protocolRevision( void ) const {
+   return ProtocolRevision( this->xDisplay() );
 }
 
 
@@ -259,8 +249,19 @@ int XX::XXDisplay::defaultScreen( void ) const {
  * @return the X11 protocol revision.
  */
 
-int XX::XXDisplay::screenCount( void ) const {
-   return ScreenCount( display );
+int XX::Display::defaultScreen( void ) const {
+   return DefaultScreen( this->xDisplay() );
+}
+
+
+/**
+ *  Return the value of the X11 protocol revision.
+ *
+ * @return the X11 protocol revision.
+ */
+
+int XX::Display::screenCount( void ) const {
+   return ScreenCount( this->xDisplay() );
 }
 
 
@@ -271,8 +272,8 @@ int XX::XXDisplay::screenCount( void ) const {
  * @return the screen width
  */
 
-int XX::XXDisplay::width( int screen ) const {
-   return DisplayWidth( display, validScreen( screen ) );
+int XX::Display::width( int screen ) const {
+   return DisplayWidth( this->xDisplay(), validScreen( screen ) );
 }
 
 /**
@@ -282,8 +283,8 @@ int XX::XXDisplay::width( int screen ) const {
  * @return the screen height
  */
 
-int XX::XXDisplay::height( int screen ) const {
-   return DisplayHeight( display, validScreen( screen ) );
+int XX::Display::height( int screen ) const {
+   return DisplayHeight( this->xDisplay(), validScreen( screen ) );
 }
 
 /**
@@ -293,34 +294,34 @@ int XX::XXDisplay::height( int screen ) const {
  * @return the screen's color depth.
  */
 
-int XX::XXDisplay::colorDepth( int screen ) const {
-   return DefaultDepth( display, validScreen( screen ) );
+int XX::Display::colorDepth( int screen ) const {
+   return DefaultDepth( this->xDisplay(), validScreen( screen ) );
 }
 
-XX::XXWindow *XX::XXDisplay::root( int screen ) const {
+XX::Window *XX::Display::root( int screen ) const {
    return &rootWindow[ validScreen( screen ) ];
 }
 
-void XX::XXDisplay::addWindow( XX::XXWindow *w ) {
+void XX::Display::addWindow( XX::Window *w ) {
    window_[ w->getXID() ] = w;
 }
 
-void XX::XXDisplay::removeWindow( XX::XXWindow *w ) {
+void XX::Display::removeWindow( XX::Window *w ) {
    window_.erase( w->getXID() );
 }
 
 /**
  *  Look up a color by name.
  *
- * @return the XXColor or NULL
+ * @return the Color or NULL
  */
 
-XX::XXColor *XX::XXDisplay::getColor( const char *name, int screen ) {
+XX::Color *XX::Display::getColor( const char *name, int screen ) {
    XColor definition, hardwareColor;
    int found = 0;
    char softName[ 255 ];
    strcpy( softName, name );
-   XX::XXColor *color = NULL;
+   XX::Color *color = NULL;
 
    found = XLookupColor( this->xDisplay(), 
          DefaultColormap( this->xDisplay(), validScreen( screen ) ),
@@ -328,7 +329,7 @@ XX::XXColor *XX::XXDisplay::getColor( const char *name, int screen ) {
    if (found == 0) {
       //throw std::runtime_error( "No such color." );
    } else {
-      color = new XX::XXColor( definition.red, definition.green, definition.blue );
+      color = new XX::Color( definition.red, definition.green, definition.blue );
    }
 
    return color;
@@ -337,9 +338,9 @@ XX::XXColor *XX::XXDisplay::getColor( const char *name, int screen ) {
 /**
  *  Look up a color by name.
  *
- * @return the XXColor or NULL
+ * @return the Color or NULL
  */
 
-XX::XXColor *XX::XXDisplay::getColor( const std::string name, int screen ) {
+XX::Color *XX::Display::getColor( const std::string name, int screen ) {
    return this->getColor( name.c_str(), screen );
 }

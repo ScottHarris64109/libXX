@@ -1,4 +1,4 @@
-// XXWindow.hh -- XXWindow class header.
+// XXWindow.hh -- XX Window class header.
 // Copyright (C) 2014,2016,2026 by Scott Harris.  All rights reserved.
 
 #ifndef XXWINDOW_HH_
@@ -11,19 +11,19 @@
 
 namespace XX {
 /**
- * @brief XXWindow is an X11 Window.
+ * @brief Window is a wrapper around an X11 Window.
  */
 
-class XXWindow {
-   // XXDisplay needs to call the parameterless constructor and makeRoot().
-   friend class XX::XXDisplay;
+class Window {
+   // Display needs to call the parameterless constructor and makeRoot().
+   friend class XX::Display;
 
 private:
-   XX::XXDisplay *display;
-   XXWindow  *parent;
-   Window     xid;
-   XX::XXColor   *background;
-   XX::XXColor   *border;
+   XX::Display *display;
+   Window  *parent;
+   ::Window     xid;
+   XX::Color   *background;
+   XX::Color   *border;
    bool       is_open;
    int        screen;
    int        originX;
@@ -35,34 +35,34 @@ private:
 
    void initialize( bool overrideRedirect );
 
-   XXWindow( void );
-   void makeRoot( XX::XXDisplay *display, int screen );
+   Window( void );
+   void makeRoot( XX::Display *display, int screen );
 
 protected:
 
 public:
    //== Constructors ===========================================================
 
-   virtual ~XXWindow();
+   virtual ~Window();
 
-   XXWindow( XX::XXDisplay *display, int screen, 
+   Window( XX::Display *display, int screen, 
         int atX, int atY, int width, int height, 
-        XX::XXColor *background=NULL, int borderWidth=-1, 
-        XX::XXColor *borderColor=NULL, bool overrideRedirect=false );
+        XX::Color *background=NULL, int borderWidth=-1, 
+        XX::Color *borderColor=NULL, bool overrideRedirect=false );
 
-   XXWindow( XX::XXDisplay *display, int atX, int atY, int width, int height, 
-        XX::XXColor *background=NULL, int borderWidth=-1, 
-        XX::XXColor *borderColor=NULL, bool overrideRedirect=false );
+   Window( XX::Display *display, int atX, int atY, int width, int height, 
+        XX::Color *background=NULL, int borderWidth=-1, 
+        XX::Color *borderColor=NULL, bool overrideRedirect=false );
 
-   XXWindow( XXWindow *parent, int atX, int atY, int width, int height, 
-        XX::XXColor *background=NULL, int borderWidth=-1, 
-        XX::XXColor *borderColor=NULL, bool overrideRedirect=false );
+   Window( Window *parent, int atX, int atY, int width, int height, 
+        XX::Color *background=NULL, int borderWidth=-1, 
+        XX::Color *borderColor=NULL, bool overrideRedirect=false );
 
    //== Accessors ==============================================================
 
-   inline Window getXID( void ) const { return xid; }
-   inline XX::XXDisplay *getDisplay( void ) const { return display; }
-   inline XX::XXColor *getBackground( void ) const { return background; }
+   inline ::Window getXID( void ) const { return xid; }
+   inline XX::Display *getDisplay( void ) const { return display; }
+   inline XX::Color *getBackground( void ) const { return background; }
    inline bool isOpen( void ) const { return is_open; }
    inline int getScreen( void ) const { return screen; }
    inline int getWidth( void ) const { return width; }

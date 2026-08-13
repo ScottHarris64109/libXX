@@ -30,7 +30,7 @@ DOCDIR=$(HOME)/Documents
 
 From there, it's just
 ```
-make
+make all
 make install
 ```
 and you're done!

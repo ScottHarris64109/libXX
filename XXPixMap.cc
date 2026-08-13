@@ -30,23 +30,23 @@
 //== Constructors =============================================================
 
 /**
- *  Destroy and deallocate a XXPixMap object.
+ *  Destroy and deallocate a PixMap object.
  */
-XX::XXPixMap::~XXPixMap( ) {
+XX::PixMap::~PixMap( ) {
    XFreePixmap( window->getDisplay()->xDisplay(), id );
 }
 
 /**
- * Create an XXPixMap for an XXWindow.
+ * Create an PixMap for an Window.
  */
-XX::XXPixMap::XXPixMap( XX::XXWindow *window, int width, int height ) : 
+XX::PixMap::PixMap( XX::Window *window, int width, int height ) : 
          window( window ), width( width ), height( height ) {
    id = XCreatePixmap( window->getDisplay()->xDisplay(),
          window->getXID(), width, height, window->getColorDepth() );
    depth = window->getColorDepth();
 }
 
-XX::XXPixMap::XXPixMap( XX::XXWindow *window, int width, int height, 
+XX::PixMap::PixMap( XX::Window *window, int width, int height, 
      const char *bitMap /* width*height/8 */ ) : 
          window( window ), width( width ), height( height ) {
    id = XCreateBitmapFromData( window->getDisplay()->xDisplay(),

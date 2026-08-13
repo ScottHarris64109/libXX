@@ -11,56 +11,56 @@
 
 namespace XX {
 /**
- * @brief XXColor is a 24-bit color for the XX library.
+ * @brief Color is a 24-bit color for the XX library.
  */
 
-class XXColor {
+class Color {
 
 private:
    unsigned int red;
    unsigned int blue;
    unsigned int green;
 
-   //void lookupColor( XXDisplay *display, int screen, const char *name );
+   //void lookupColor( XX::Display *display, int screen, const char *name );
  
 protected:
 
 public:
    //== Constructors ===========================================================
 
-   /// Deallocate and destroy this XXColor.
-   virtual ~XXColor();
+   /// Deallocate and destroy this Color.
+   virtual ~Color();
 
-   /// Create an XXColor from RGB component values.
-   XXColor( unsigned int red, unsigned int green, unsigned int blue );
+   /// Create a Color from RGB component values.
+   Color( unsigned int red, unsigned int green, unsigned int blue );
 
-   // Look up an XXColor by name.
-   //XXColor( XXDisplay *display, string name );
+   // Look up a Color by name.
+   //Color( XX::Display *display, string name );
 
-   // Look up an XXColor by name.
-   //XXColor( XXDisplay *display, const char *name );
+   // Look up a Color by name.
+   //Color( XX::Display *display, const char *name );
 
-   // Look up an XXColor by name.
-   //XXColor( XXDisplay *display, int screen, string name );
+   // Look up a Color by name.
+   //Color( XX::Display *display, int screen, string name );
 
-   // Look up an XXColor by name.
-   //XXColor( XXDisplay *display, int screen, const char *name );
+   // Look up a Color by name.
+   //Color( XX::Display *display, int screen, const char *name );
 
-   // Look up an XXColor by name.
-   //XXColor( XXWindow *window, string name );
+   // Look up a Color by name.
+   //Color( XX::Window *window, string name );
 
-   // Look up an XXColor by name.
-   //XXColor( XXWindow *window, const char *name );
+   // Look up a Color by name.
+   //Color( XX::Window *window, const char *name );
 
-   // Look up an XXColor by name.
-   //XXColor( XXGC *gc, string name );
+   // Look up a Color by name.
+   //Color( XX::GC *gc, string name );
 
-   // Look up an XXColor by name.
-   //XXColor( XXGC *gc, const char *name );
+   // Look up a Color by name.
+   //Color( XX::GC *gc, const char *name );
 
    //== Accessors ==============================================================
 
-   /// Get the XColor pixel value.
+   /// Get the X11 Color pixel value.
    inline unsigned long getPixel( void ) {
       return (red << 16) | (green << 8) | blue;
    }

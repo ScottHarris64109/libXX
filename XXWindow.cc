@@ -1,5 +1,5 @@
 /*#############################################################################
- * XXWindow.cc -- XXWindow class code.
+ * XXWindow.cc -- Window class code.
  * Copyright (C) 2012,2016,2026 by Scott Harris.  
  *
  *  This library is free software: you can redistribute it and/or modify
@@ -26,30 +26,30 @@
 //== Constructors =============================================================
 
 /**
- *  Destroy and deallocate a XXWindow object.
+ *  Destroy and deallocate a Window object.
  */
 
-XX::XXWindow::~XXWindow( ) {
+XX::Window::~Window( ) {
    this->display->removeWindow( this );
    XDestroyWindow( this->display->xDisplay(), this->getXID() );
 }
 
 /**
- *  Create the root XXWindow for an XXDisplay.
+ *  Create the root Window for a Display.
  */
 
-XX::XXWindow::XXWindow( ) {
+XX::Window::Window( ) {
    parent = NULL;
    display = NULL;
    is_open = false;
-   //background = new XX::XXColor( 0xff, 0xff, 0xff );
+   //background = new XX::Color( 0xff, 0xff, 0xff );
 }
 
 /**
- *  Make this the root XXWindow for an XXDisplay.
+ *  Make this the root Window for a Display.
  */
 
-void XX::XXWindow::makeRoot( XX::XXDisplay* display, int screen ) {
+void XX::Window::makeRoot( XX::Display* display, int screen ) {
    this->display = display;
    this->screen = screen;
    parent = NULL;
@@ -65,7 +65,7 @@ void XX::XXWindow::makeRoot( XX::XXDisplay* display, int screen ) {
 }
 
 /*
-XXWindow::XXWindow( XXWindow *parent, 
+Window::Window( Window *parent, 
       int originX, int originY, int width, int height ) :
             parent( parent ), originX( originX ), originY( originY ), 
             width( width ), height( height ) {
@@ -104,9 +104,9 @@ XXWindow::XXWindow( XXWindow *parent,
 }
 */
 
-XX::XXWindow::XXWindow( XX::XXDisplay *display, int screen,
-      int originX, int originY, int width, int height, XX::XXColor *background,
-      int borderWidth, XX::XXColor *border, bool overrideRedirect ) :
+XX::Window::Window( XX::Display *display, int screen,
+      int originX, int originY, int width, int height, XX::Color *background,
+      int borderWidth, XX::Color *border, bool overrideRedirect ) :
             display( display ), screen( screen ), 
             originX( originX ), originY( originY ), 
             width( width ), height( height ), background( background ),
@@ -116,9 +116,9 @@ XX::XXWindow::XXWindow( XX::XXDisplay *display, int screen,
    initialize( overrideRedirect );
 }
 
-XX::XXWindow::XXWindow( XX::XXDisplay *display, 
-      int originX, int originY, int width, int height, XX::XXColor *background,
-      int borderWidth, XX::XXColor *border, bool overrideRedirect ) :
+XX::Window::Window( XX::Display *display, 
+      int originX, int originY, int width, int height, XX::Color *background,
+      int borderWidth, XX::Color *border, bool overrideRedirect ) :
             display( display ), originX( originX ), originY( originY ), 
             width( width ), height( height ), background( background ),
             borderWidth( borderWidth ), border( border ) {
@@ -128,9 +128,9 @@ XX::XXWindow::XXWindow( XX::XXDisplay *display,
    initialize( overrideRedirect );
 }
 
-XX::XXWindow::XXWindow( XX::XXWindow *parent, 
-      int originX, int originY, int width, int height, XX::XXColor *background,
-      int borderWidth, XX::XXColor *border, bool overrideRedirect ) :
+XX::Window::Window( XX::Window *parent, 
+      int originX, int originY, int width, int height, XX::Color *background,
+      int borderWidth, XX::Color *border, bool overrideRedirect ) :
             parent( parent ), originX( originX ), originY( originY ), 
             width( width ), height( height ), background( background ),
             borderWidth( borderWidth ), border( border ) {
@@ -140,7 +140,7 @@ XX::XXWindow::XXWindow( XX::XXWindow *parent,
    initialize( overrideRedirect );
 }
 
-void XX::XXWindow::initialize( bool overrideRedirect ) {
+void XX::Window::initialize( bool overrideRedirect ) {
    XSetWindowAttributes attributes;
    unsigned long        mask = 0;
 
@@ -175,7 +175,7 @@ void XX::XXWindow::initialize( bool overrideRedirect ) {
 /**
  * Get the X11 Atom needed to trap the close event for this window.
  */
-Atom XX::XXWindow::getCloseAtom() {
+Atom XX::Window::getCloseAtom() {
    Atom closeAtom=XInternAtom(display->xDisplay(), "WM_DELETE_WINDOW", True);
    XSetWMProtocols(display->xDisplay(), this->getXID(), &closeAtom, 1);
    return closeAtom;
@@ -183,7 +183,7 @@ Atom XX::XXWindow::getCloseAtom() {
 
 //== Operations ===============================================================
 
-void XX::XXWindow::open( bool immediately ) {
+void XX::Window::open( bool immediately ) {
    XMapWindow( display->xDisplay(), getXID() );
    is_open = true;
    if (immediately) {
@@ -191,7 +191,7 @@ void XX::XXWindow::open( bool immediately ) {
    }
 }
 
-void XX::XXWindow::close( bool immediately ) {
+void XX::Window::close( bool immediately ) {
    XUnmapWindow( display->xDisplay(), getXID() );
    is_open = false;
    if (immediately) {
@@ -199,12 +199,12 @@ void XX::XXWindow::close( bool immediately ) {
    }
 }
 
-void XX::XXWindow::listenFor( unsigned long events ) {
+void XX::Window::listenFor( unsigned long events ) {
    eventMask = events;
    XSelectInput( display->xDisplay(), getXID(), events );
 }
 
-XEvent *XX::XXWindow::getNextEvent( XEvent *event, bool block ) {
+XEvent *XX::Window::getNextEvent( XEvent *event, bool block ) {
    if (block) {
       XWindowEvent( display->xDisplay(), getXID(), eventMask, event );
    } else if (!XCheckWindowEvent( display->xDisplay(), getXID(), 
@@ -214,7 +214,7 @@ XEvent *XX::XXWindow::getNextEvent( XEvent *event, bool block ) {
    return event;
 }
 
-XEvent *XX::XXWindow::getNextEvent( XEvent *event, unsigned long eventTypes, 
+XEvent *XX::Window::getNextEvent( XEvent *event, unsigned long eventTypes, 
       bool block ) {
    if (block) {
       XWindowEvent( display->xDisplay(), getXID(), eventTypes, event );

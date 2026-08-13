@@ -11,14 +11,14 @@
 namespace XX {
 
 /**
- * @brief XXFont encapsulates an X11 XFontStruct.
+ * @brief Font encapsulates an X11 XFontStruct.
  */
 
-class XXFont {
+class Font {
 
 private:
-   XX::XXDisplay *display;
-   XFontStruct *font;
+   XX::Display *display;
+   XFontStruct *xfont;
    std::string name;
 
 protected:
@@ -26,14 +26,14 @@ protected:
 public:
    //== Constructors ===========================================================
 
-   /// Deallocate and destroy this XXFont.
-   virtual ~XXFont();
+   /// Deallocate and destroy this Font.
+   virtual ~Font();
 
    /// Look up a font by name.
-   XXFont( XX::XXDisplay *display, const std::string fontName );
+   Font( XX::Display *display, const std::string fontName );
 
    /// Look up a font by name.
-   XXFont( XX::XXDisplay *display, const char *fontName );
+   Font( XX::Display *display, const char *fontName );
 
    //== Accessors ==============================================================
 
@@ -41,7 +41,7 @@ public:
    inline std::string getName( void ) const { return name; }
 
    /// Get the X11 font ID.
-   inline Font getXFont( void ) const { return font->fid; }
+   inline ::Font getXFont( void ) const { return xfont->fid; }
 
    //== Operations =============================================================
 

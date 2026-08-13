@@ -15,18 +15,18 @@
 namespace XX {
 
 /**
- * @brief XXGC encapsulates an X11 GC (Graphics Context).
+ * @brief GC encapsulates an X11 GC (Graphics Context).
  */
 
-class XXGC {
+class GC {
 
 private:
-   XX::XXWindow  *window;
-   XX::XXPixMap  *pixmap;
-   XID       target;
-   GC        gc;
+   XX::Window  *window;
+   XX::PixMap  *pixmap;
+   XID         target;
+   ::GC          xgc;
 
-   GC create( void );
+   ::GC create( void );
 
    inline int angle( double degrees ) const {
       return (int)((degrees * 64.0) + 0.5);
@@ -37,30 +37,30 @@ protected:
 public:
    //== Constructors ===========================================================
 
-   /// Deallocate and destroy this XXGC.
-   virtual ~XXGC();
+   /// Deallocate and destroy this GC.
+   virtual ~GC();
 
-   /// Get a new XXGC for the XXWindow.
-   XXGC( XX::XXWindow *window );
+   /// Get a new GC for the Window.
+   GC( XX::Window *window );
 
-   /// Get a new XXGC for the XXPixmap.
-   XXGC( XX::XXPixMap *pixmap );
+   /// Get a new GC for the XXPixmap.
+   GC( XX::PixMap *pixmap );
 
    //== Accessors ==============================================================
 
-   /// Get the XXWindow that this XXGC draws in.
-   inline XX::XXWindow *getWindow( void ) const {
+   /// Get the Window that this GC draws in.
+   inline XX::Window *getWindow( void ) const {
       return window;
    }
 
    /// Set the foreground color.
-   void setForeground( XX::XXColor *color );
+   void setForeground( XX::Color *color );
 
    /// Set the background color.
-   void setBackground( XX::XXColor *color );
+   void setBackground( XX::Color *color );
 
    /// Set the font for drawing text.
-   void setFont( XX::XXFont *font );
+   void setFont( XX::Font *font );
 
    //== Operations =============================================================
 
@@ -93,4 +93,4 @@ public:
 }; // class
 }; // namespace
 
-#endif /* XXGC_HH_ */
+#endif /* GC_HH_ */
