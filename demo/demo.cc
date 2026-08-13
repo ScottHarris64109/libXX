@@ -156,18 +156,10 @@ std::multimap<std::string,std::string> parse_args( int argc, char *argv[] ) {
 std::string getArg( const std::multimap<std::string,std::string> &arg, 
       std::string key, int index, std::string defaultValue ) {
    if (arg.count( key ) <= index) return defaultValue;
-   return arg.find(key)->second;
-/*
-typedef std::multimap<T1, T2>::iterator iter;
-for (std::pair<iter, iter> range(myMap.equal_range(myKey));
-     range.first != range.second;
-     ++range.first)
-{
-    //In each iteration range.first will refer to a different object
-    //In each case, range.first->first will be equivalent to myKey
-    //and range.first->second will be a value that range.first->first maps to.
-}
-*/
+
+   auto it = arg.find(key);
+   for (int step = 0; step < index; step++) it++;
+   return it->second;
 }
 
 void loop( XX::Display *display, XX::Window *window, XX::GC *gc, XX::Font *font, 
