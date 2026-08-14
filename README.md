@@ -39,17 +39,6 @@ and you're done!
 
 A demo program is included.
 
-## Contributing
-
-1. Fork it!
-   ```sh
-   git clone https://github.com/github_username/repo_name.git
-   ```
-2. Create your feature branch: `git checkout -b my-new-feature`
-3. Commit your changes: `git commit -am 'Add some feature'`
-4. Push to the branch: `git push origin my-new-feature`
-5. Submit a pull request :D
-
 ## History
 
 - **2012** First draft.

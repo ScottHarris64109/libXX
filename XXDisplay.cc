@@ -28,6 +28,15 @@
 
 #define BUFFER_SIZE 255
 
+namespace XX {
+static bool X11_hasBeenInitialized = false;
+
+extern "C" int criticalErrorHandler( ::Display *xdisplay, 
+      ::XErrorEvent *error );
+extern "C" int fatalErrorHandler( ::Display *xdisplay );
+void initializeX11();
+};
+
 //== Constructors =============================================================
 
 /**
@@ -42,7 +51,6 @@ XX::Display::~Display( ) {
    if (rootWindow != NULL) {
       delete[] rootWindow;
    }
-
 }
 
 /**
@@ -54,17 +62,27 @@ XX::Display::~Display( ) {
  */
 
 void XX::Display::init( void ) {
-   if (!XX::errorHandlersHaveBeenSet) {
-      XSetErrorHandler( XX::criticalErrorHandler );
-      XSetIOErrorHandler( XX::fatalErrorHandler );
-
-      XX::errorHandlersHaveBeenSet = true;
+   if (!XX::X11_hasBeenInitialized) {
+      XX::initializeX11();
    }
+
    this->xdisplay = XOpenDisplay( this->name_ );
    rootWindow = new XX::Window[ this->screenCount() ];
    for (int screen = 0; screen < this->screenCount(); screen++) {
       rootWindow[ screen ].makeRoot( this, screen );
    }
+}
+
+/*
+ *  Initialize the X11 system (actually, our interaction with it).  This 
+ *  should be called before the first Display object is fully instantiated 
+ *  and never needs to be called again.
+ */
+void XX::initializeX11() {
+      XSetErrorHandler( XX::criticalErrorHandler );
+      XSetIOErrorHandler( XX::fatalErrorHandler );
+
+      XX::X11_hasBeenInitialized = true;
 }
 
 extern "C" int XX::criticalErrorHandler( ::Display *xdisplay, 
