@@ -9,12 +9,10 @@
 #define XXDISPLAY_HH_
 
 #include <string>
-#include <map>
 #include <X11/Xlib.h>
 
 namespace XX {
-   class Window;
-   class Color;
+   class Screen;
 
 /**
  * @brief Display is an X11 Display object.  
@@ -26,22 +24,13 @@ namespace XX {
  * will be used.
  */
 class Display {
-   // Window constructors and destructors need access to 
-   // addWindow() and removeWindow().
-   friend class Window;
 
 private:
    const char *name_;
    ::Display *xdisplay;
-   Window *rootWindow;
-   std::map<XID, Window*> window_;
+   Screen **screen_;
 
    void init( void );
-
-   int validScreen( int screen ) const;
-
-   void addWindow( Window *w );
-   void removeWindow( Window *w );
 
 protected:
 
@@ -65,18 +54,8 @@ public:
    int protocolVersion( void ) const;
    int protocolRevision( void ) const;
    int screenCount( void ) const;
-   int defaultScreen( void ) const;
-   int width(int screen=-1) const;
-   int height(int screen=-1) const;
-   int colorDepth(int screen=-1) const;
 
-   Window *root(int screen=-1) const;
-
-   /// Look up a Window by its XID.
-   inline Window *window(XID id) { return window_[id]; };
-
-   Color *getColor( const std::string name, int screen=-1 );
-   Color *getColor( const char *name, int screen=-1 );
+   Screen *screen( int which=-1 ) const;
 
    //== Operations =============================================================
 

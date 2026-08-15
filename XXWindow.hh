@@ -7,6 +7,7 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include "XXDisplay.hh"
+#include "XXScreen.hh"
 #include "XXColor.hh"
 
 namespace XX {
@@ -15,17 +16,15 @@ namespace XX {
  */
 
 class Window {
-   // Display needs to call the parameterless constructor and makeRoot().
-   friend class XX::Display;
 
 private:
    XX::Display *display;
+   XX::Screen *screen_;
    Window  *parent;
    ::Window     xid;
    XX::Color   *background;
    XX::Color   *border;
    bool       is_open;
-   int        screen;
    int        originX;
    int        originY;
    int        height;
@@ -35,9 +34,6 @@ private:
 
    void initialize( bool overrideRedirect );
 
-   Window( void );
-   void makeRoot( XX::Display *display, int screen );
-
 protected:
 
 public:
@@ -45,12 +41,9 @@ public:
 
    virtual ~Window();
 
-   Window( XX::Display *display, int screen, 
-        int atX, int atY, int width, int height, 
-        XX::Color *background=NULL, int borderWidth=-1, 
-        XX::Color *borderColor=NULL, bool overrideRedirect=false );
+   Window( XX::Screen *s );
 
-   Window( XX::Display *display, int atX, int atY, int width, int height, 
+   Window( XX::Screen *screen, int atX, int atY, int width, int height, 
         XX::Color *background=NULL, int borderWidth=-1, 
         XX::Color *borderColor=NULL, bool overrideRedirect=false );
 
@@ -61,15 +54,15 @@ public:
    //== Accessors ==============================================================
 
    inline ::Window getXID( void ) const { return xid; }
-   inline XX::Display *getDisplay( void ) const { return display; }
+   inline XX::Display *getDisplay( void ) const { return this->screen()->display(); }
    inline XX::Color *getBackground( void ) const { return background; }
    inline bool isOpen( void ) const { return is_open; }
-   inline int getScreen( void ) const { return screen; }
+   inline XX::Screen *screen( void ) const { return this->screen_; }
    inline int getWidth( void ) const { return width; }
    inline int getHeight( void ) const { return height; }
 
    inline int getColorDepth( void ) const { 
-      return this->display->colorDepth( this->getScreen() );
+      return this->screen()->colorDepth();
    }
 
    Atom getCloseAtom();

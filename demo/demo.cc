@@ -89,20 +89,20 @@ int main( int argc, char *argv[] ) {
    std::cout << "Got display.\n";
    std::cout << display->vendorName() << " | " << display->name() <<"\n";
    std::cout << display->screenCount() << " screens.\n";
-   for (int screen=0; screen < display->screenCount(); screen++)
+   for (int s=0; s < display->screenCount(); s++)
    {
-      std::cout << "  " << screen << ". " << display->width( screen ) 
-         << " x " << display->height( screen ) 
-         << " x " << display->colorDepth( screen ) << "\n";
+      std::cout << "  " << s << ". " << display->screen( s )->width() 
+         << " x " << display->screen( s )->height() 
+         << " x " << display->screen( s )->colorDepth() << "\n";
    }
 
    std::cout << "Getting colors.\n";
-   background = display->getColor( bgname );
-   fg1 = display->getColor( fg1name );
-   fg2 = display->getColor( fg2name );
+   background = display->screen()->getColor( bgname );
+   fg1 = display->screen()->getColor( fg1name );
+   fg2 = display->screen()->getColor( fg2name );
    std::cout << "Got colors.\n";
 
-   window = new XX::Window( display, 500, 100, 500, 500, background );
+   window = new XX::Window( display->screen(), 500, 100, 500, 500, background );
    std::cout << "Got window.\n";
 
    gc = new XX::GC( window );

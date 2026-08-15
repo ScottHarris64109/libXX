@@ -9,9 +9,9 @@ LIBRARY=libXX.a
 HTMLDIR=$(DOCDIR)/libXX
 DOCUMENT=doc/html/index.html
 
-HEADERS= XXDisplay.hh XXWindow.hh XXPixMap.hh XXColor.hh XXGC.hh XXFont.hh 
-MODULES= XXDisplay.cc XXWindow.cc XXPixMap.cc XXColor.cc XXGC.cc XXFont.cc
-OBJECTS= XXDisplay.o  XXWindow.o  XXPixMap.o  XXColor.o  XXGC.o  XXFont.o  
+HEADERS= XXDisplay.hh XXScreen.hh XXWindow.hh XXPixMap.hh XXColor.hh XXGC.hh XXFont.hh 
+MODULES= XXDisplay.cc XXScreen.cc XXWindow.cc XXPixMap.cc XXColor.cc XXGC.cc XXFont.cc
+OBJECTS= XXDisplay.o  XXScreen.o  XXWindow.o  XXPixMap.o  XXColor.o  XXGC.o  XXFont.o  
 
 $(LIBRARY): $(LIBRARY)( $(OBJECTS) )
 

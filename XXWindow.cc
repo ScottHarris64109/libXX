@@ -16,11 +16,13 @@
  *  along with this library.  If not, see <https://www.gnu.org/licenses/>.
  *#############################################################################
  */
+#include <iostream>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 
 #include "XXDisplay.hh"
 #include "XXWindow.hh"
+#include "XXScreen.hh"
 #include "XXColor.hh"
 
 //== Constructors =============================================================
@@ -30,38 +32,40 @@
  */
 
 XX::Window::~Window( ) {
-   this->display->removeWindow( this );
-   XDestroyWindow( this->display->xDisplay(), this->getXID() );
+   this->screen()->removeWindow( this );
+   XDestroyWindow( this->screen()->display()->xDisplay(), this->getXID() );
 }
 
 /**
- *  Create the root Window for a Display.
+ *  Create a Window for a Screen.
  */
 
-XX::Window::Window( ) {
-   parent = NULL;
-   display = NULL;
-   is_open = false;
-   //background = new XX::Color( 0xff, 0xff, 0xff );
-}
+XX::Window::Window( XX::Screen *scr ) : screen_{ scr } {
+   this->parent = this->screen()->rootWindow();
+   this->originX = 0;
+   this->originY = 0;
+   this->height = this->screen()->height();
+   this->width  = this->screen()->width();
 
-/**
- *  Make this the root Window for a Display.
- */
+   if (this->parent)
+   {
+      this->background  = this->parent->background;
+      this->borderWidth = this->parent->borderWidth;
+      this->border      = this->parent->border;
+      this->initialize( false );
+   }
+   else // We are creating the root window for this screen.
+   {
+      this->is_open = false;
+      this->background = this->screen()->getColor( "white" );
+      this->borderWidth = 3;
+      this->border = this->background;
 
-void XX::Window::makeRoot( XX::Display* display, int screen ) {
-   this->display = display;
-   this->screen = screen;
-   parent = NULL;
-   xid = RootWindow( display->xDisplay(), screen );
-   originX = 0;
-   originY = 0;
-   height = display->height( screen );
-   width  = display->width( screen );
-   background = display->getColor( "white", screen );
-   borderWidth = 3;
-   border = background;
-   this->display->addWindow( this );
+      this->xid = RootWindow( this->screen()->display()->xDisplay(), 
+            this->screen()->index() );
+   }
+
+   this->screen()->addWindow( this );
 }
 
 /*
@@ -90,7 +94,7 @@ Window::Window( Window *parent,
 
    xid = XCreateWindow( display->xDisplay(), parent->getXID(), 
          originX, originY, width, height, borderWidth,
-         display->colorDepth( screen ),
+         display->screen( screen )->colorDepth(),
          InputOutput, CopyFromParent, mask, &attributes );
 
    sizeHints.x      = originX;
@@ -104,27 +108,15 @@ Window::Window( Window *parent,
 }
 */
 
-XX::Window::Window( XX::Display *display, int screen,
+XX::Window::Window( XX::Screen *scr,
       int originX, int originY, int width, int height, XX::Color *background,
       int borderWidth, XX::Color *border, bool overrideRedirect ) :
-            display( display ), screen( screen ), 
+            screen_( scr ), 
             originX( originX ), originY( originY ), 
             width( width ), height( height ), background( background ),
             borderWidth( borderWidth ), border( border ) {
 
-   parent = display->root( screen );
-   initialize( overrideRedirect );
-}
-
-XX::Window::Window( XX::Display *display, 
-      int originX, int originY, int width, int height, XX::Color *background,
-      int borderWidth, XX::Color *border, bool overrideRedirect ) :
-            display( display ), originX( originX ), originY( originY ), 
-            width( width ), height( height ), background( background ),
-            borderWidth( borderWidth ), border( border ) {
-
-   screen = display->defaultScreen();
-   parent = display->root( screen );
+   parent = this->screen()->rootWindow();
    initialize( overrideRedirect );
 }
 
@@ -135,8 +127,7 @@ XX::Window::Window( XX::Window *parent,
             width( width ), height( height ), background( background ),
             borderWidth( borderWidth ), border( border ) {
 
-   display = parent->display;
-   screen = parent->screen;
+   screen_ = parent->screen();
    initialize( overrideRedirect );
 }
 
@@ -155,19 +146,20 @@ void XX::Window::initialize( bool overrideRedirect ) {
    }
    is_open = false;
 
-   attributes.border_pixel     = background->getPixel();
+   attributes.border_pixel     = border->getPixel();
    mask |= CWBorderPixel;
    attributes.background_pixel = background->getPixel();
    mask |= CWBackPixel;
    attributes.override_redirect = (overrideRedirect) ? True: False;
    mask |= CWOverrideRedirect;
 
-   xid = XCreateWindow( display->xDisplay(), parent->getXID(), 
+   xid = XCreateWindow( this->screen()->display()->xDisplay(), 
+         parent->getXID(), 
          originX, originY, width, height, borderWidth,
-         display->colorDepth( screen ),
+         screen()->colorDepth(),
          InputOutput, CopyFromParent, mask, &attributes );
 
-   this->display->addWindow( this );
+   this->screen()->addWindow( this );
 }
 
 //== Accessors ================================================================
@@ -176,38 +168,40 @@ void XX::Window::initialize( bool overrideRedirect ) {
  * Get the X11 Atom needed to trap the close event for this window.
  */
 Atom XX::Window::getCloseAtom() {
-   Atom closeAtom=XInternAtom(display->xDisplay(), "WM_DELETE_WINDOW", True);
-   XSetWMProtocols(display->xDisplay(), this->getXID(), &closeAtom, 1);
+   Atom closeAtom=XInternAtom( this->screen()->display()->xDisplay(), 
+         "WM_DELETE_WINDOW", True);
+   XSetWMProtocols( this->screen()->display()->xDisplay(), this->getXID(), 
+         &closeAtom, 1);
    return closeAtom;
 }
 
 //== Operations ===============================================================
 
 void XX::Window::open( bool immediately ) {
-   XMapWindow( display->xDisplay(), getXID() );
+   XMapWindow( this->screen()->display()->xDisplay(), getXID() );
    is_open = true;
    if (immediately) {
-      display->flush();
+      this->screen()->display()->flush();
    }
 }
 
 void XX::Window::close( bool immediately ) {
-   XUnmapWindow( display->xDisplay(), getXID() );
+   XUnmapWindow( this->screen()->display()->xDisplay(), getXID() );
    is_open = false;
    if (immediately) {
-      display->flush();
+      this->screen()->display()->flush();
    }
 }
 
 void XX::Window::listenFor( unsigned long events ) {
    eventMask = events;
-   XSelectInput( display->xDisplay(), getXID(), events );
+   XSelectInput( this->screen()->display()->xDisplay(), getXID(), events );
 }
 
 XEvent *XX::Window::getNextEvent( XEvent *event, bool block ) {
    if (block) {
-      XWindowEvent( display->xDisplay(), getXID(), eventMask, event );
-   } else if (!XCheckWindowEvent( display->xDisplay(), getXID(), 
+      XWindowEvent( this->screen()->display()->xDisplay(), getXID(), eventMask, event );
+   } else if (!XCheckWindowEvent( this->screen()->display()->xDisplay(), getXID(), 
             eventMask, event )) {
       return NULL;
    }
@@ -217,8 +211,8 @@ XEvent *XX::Window::getNextEvent( XEvent *event, bool block ) {
 XEvent *XX::Window::getNextEvent( XEvent *event, unsigned long eventTypes, 
       bool block ) {
    if (block) {
-      XWindowEvent( display->xDisplay(), getXID(), eventTypes, event );
-   } else if (!XCheckWindowEvent( display->xDisplay(), getXID(), 
+      XWindowEvent( this->screen()->display()->xDisplay(), getXID(), eventTypes, event );
+   } else if (!XCheckWindowEvent( this->screen()->display()->xDisplay(), getXID(), 
             eventTypes, event )) {
       return NULL;
    }

@@ -23,7 +23,7 @@
 #include <iostream>
 
 #include "XXDisplay.hh"
-#include "XXWindow.hh"
+#include "XXScreen.hh"
 #include "XXColor.hh"
 
 #define BUFFER_SIZE 255
@@ -44,12 +44,12 @@ void initializeX11();
  */
 
 XX::Display::~Display( ) {
-   if (this->xdisplay != NULL) {
+   if (this->xdisplay != nullptr) {
       XCloseDisplay( this->xdisplay );
    }
 
-   if (rootWindow != NULL) {
-      delete[] rootWindow;
+   if (screen_ != nullptr) {
+      delete[] screen_;
    }
 }
 
@@ -67,9 +67,16 @@ void XX::Display::init( void ) {
    }
 
    this->xdisplay = XOpenDisplay( this->name_ );
-   rootWindow = new XX::Window[ this->screenCount() ];
-   for (int screen = 0; screen < this->screenCount(); screen++) {
-      rootWindow[ screen ].makeRoot( this, screen );
+   this->name_ = DisplayString( this->xdisplay );
+   screen_ = (XX::Screen **)calloc( this->screenCount(), sizeof(XX::Screen *) );
+   if (!screen_)
+   {
+            this->screenCount(), this->name_ );
+      std::bad_alloc exception;
+      throw exception;
+   }
+   for (int s = 0; s < this->screenCount(); s++) {
+      screen_[s] = new XX::Screen( this, s );
    }
 }
 
@@ -139,24 +146,6 @@ XX::Display::Display( std::string displayName ) {
 }
 
 //== Operations ===============================================================
-
-/**
- *  Return the validated screen number or throw an exception.  
- *  If the screen number is -1, return the default screen number for 
- *  the display.
- */
-int XX::Display::validScreen( int screen ) const {
-   if (screen == -1) {
-      return this->defaultScreen();
-   }
-   if (screen < 0) {
-      throw std::range_error( "Screen number cannot be less than zero." );
-   }
-   if (screen >= screenCount()) {
-      throw std::range_error( "Screen number is too high." );
-   }
-   return screen;
-}
 
 /**
  *  Flush the display.
@@ -260,20 +249,8 @@ int XX::Display::protocolRevision( void ) const {
    return ProtocolRevision( this->xDisplay() );
 }
 
-
 /**
- *  Return the value of the X11 protocol revision.
- *
- * @return the X11 protocol revision.
- */
-
-int XX::Display::defaultScreen( void ) const {
-   return DefaultScreen( this->xDisplay() );
-}
-
-
-/**
- *  Return the value of the X11 protocol revision.
+ *  Return the number of screens associated with this Display.
  *
  * @return the X11 protocol revision.
  */
@@ -282,83 +259,23 @@ int XX::Display::screenCount( void ) const {
    return ScreenCount( this->xDisplay() );
 }
 
-
 /**
- *  Return the width of the screen in pixels.
- *
- * @param screen screen number
- * @return the screen width
+ *  Return the requested screen or throw an exception.  
+ *  If the screen number is -1, return the default screen for 
+ *  the display.
  */
+XX::Screen *XX::Display::screen( int which ) const {
+   int s = which;
 
-int XX::Display::width( int screen ) const {
-   return DisplayWidth( this->xDisplay(), validScreen( screen ) );
-}
-
-/**
- *  Return the height of the screen in pixels.
- *
- * @param screen screen number
- * @return the screen height
- */
-
-int XX::Display::height( int screen ) const {
-   return DisplayHeight( this->xDisplay(), validScreen( screen ) );
-}
-
-/**
- *  Return the number of color bits for the screen.
- *
- * @param screen screen number
- * @return the screen's color depth.
- */
-
-int XX::Display::colorDepth( int screen ) const {
-   return DefaultDepth( this->xDisplay(), validScreen( screen ) );
-}
-
-XX::Window *XX::Display::root( int screen ) const {
-   return &rootWindow[ validScreen( screen ) ];
-}
-
-void XX::Display::addWindow( XX::Window *w ) {
-   window_[ w->getXID() ] = w;
-}
-
-void XX::Display::removeWindow( XX::Window *w ) {
-   window_.erase( w->getXID() );
-}
-
-/**
- *  Look up a color by name.
- *
- * @return the Color or NULL
- */
-
-XX::Color *XX::Display::getColor( const char *name, int screen ) {
-   XColor definition, hardwareColor;
-   int found = 0;
-   char softName[ 255 ];
-   strcpy( softName, name );
-   XX::Color *color = NULL;
-
-   found = XLookupColor( this->xDisplay(), 
-         DefaultColormap( this->xDisplay(), validScreen( screen ) ),
-         softName, &definition, &hardwareColor );
-   if (found == 0) {
-      //throw std::runtime_error( "No such color." );
-   } else {
-      color = new XX::Color( definition.red, definition.green, definition.blue );
+   if (which == -1) {
+      s = DefaultScreen( this->xDisplay() );
+   }
+   else if (which < 0) {
+      throw std::range_error( "Screen number cannot be less than zero." );
+   }
+   else if (which >= this->screenCount()) {
+      throw std::range_error( "Screen number is too high." );
    }
 
-   return color;
-}
-
-/**
- *  Look up a color by name.
- *
- * @return the Color or NULL
- */
-
-XX::Color *XX::Display::getColor( const std::string name, int screen ) {
-   return this->getColor( name.c_str(), screen );
+   return this->screen_[s];
 }
