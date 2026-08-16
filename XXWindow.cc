@@ -17,6 +17,7 @@
  *#############################################################################
  */
 #include <iostream>
+
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 
@@ -32,7 +33,14 @@
  */
 
 XX::Window::~Window( ) {
-   this->screen()->removeWindow( this );
+   while (!children.empty())
+   {
+      delete this->children.begin()->second;
+   }
+   // Detach from parent.
+   if (this->parent) {
+      this->parent->children.erase( this->getXID() );
+   }
    XDestroyWindow( this->screen()->display()->xDisplay(), this->getXID() );
 }
 
@@ -64,8 +72,6 @@ XX::Window::Window( XX::Screen *scr ) : screen_{ scr } {
       this->xid = RootWindow( this->screen()->display()->xDisplay(), 
             this->screen()->index() );
    }
-
-   this->screen()->addWindow( this );
 }
 
 /*
@@ -104,7 +110,6 @@ Window::Window( Window *parent,
    sizeHints.flags  = PPosition | PSize;
 
    XSetNormalHints( display->xDisplay(), getXID(), &sizeHints );
-   this->display->addWindow( this );
 }
 */
 
@@ -159,7 +164,7 @@ void XX::Window::initialize( bool overrideRedirect ) {
          screen()->colorDepth(),
          InputOutput, CopyFromParent, mask, &attributes );
 
-   this->screen()->addWindow( this );
+   this->parent->children[ this->getXID() ] = this;
 }
 
 //== Accessors ================================================================

@@ -4,9 +4,12 @@
 #ifndef XXWINDOW_HH_
 #define XXWINDOW_HH_
 
+#include <unordered_map>
+
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include "XXDisplay.hh"
+
 #include "XXScreen.hh"
 #include "XXColor.hh"
 
@@ -18,9 +21,9 @@ namespace XX {
 class Window {
 
 private:
-   XX::Display *display;
    XX::Screen *screen_;
    Window  *parent;
+   std::unordered_map<XID, Window*> children;
    ::Window     xid;
    XX::Color   *background;
    XX::Color   *border;

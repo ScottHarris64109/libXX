@@ -33,7 +33,6 @@
 
 XX::Screen::~Screen( ) {
    if (this->root_) delete this->root_;
-   // TODO:  Delete window_map
 }
 
 /**
@@ -47,14 +46,6 @@ XX::Screen::Screen( XX::Display *display, int index ) :
    this->colorDepth_ = DefaultDepth( this->display()->xDisplay(), this->index() );
    this->root_ = nullptr;
    this->root_ = new XX::Window( this );
-}
-
-void XX::Screen::addWindow( XX::Window *w ) {
-   this->window_[ w->getXID() ] = w;
-}
-
-void XX::Screen::removeWindow( XX::Window *w ) {
-   this->window_.erase( w->getXID() );
 }
 
 /**

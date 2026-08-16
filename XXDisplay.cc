@@ -71,6 +71,7 @@ void XX::Display::init( void ) {
    screen_ = (XX::Screen **)calloc( this->screenCount(), sizeof(XX::Screen *) );
    if (!screen_)
    {
+      fprintf( stderr, "Cannot allocate %d Screens for Display \"%s\".\n",
             this->screenCount(), this->name_ );
       std::bad_alloc exception;
       throw exception;
