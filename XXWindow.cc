@@ -45,73 +45,23 @@ XX::Window::~Window( ) {
 }
 
 /**
- *  Create a Window for a Screen.
+ *  Create a root Window for a Screen.
  */
 
 XX::Window::Window( XX::Screen *scr ) : screen_{ scr } {
-   this->parent = this->screen()->rootWindow();
+   this->parent = nullptr;
+   this->is_open = false;
    this->originX = 0;
    this->originY = 0;
    this->height = this->screen()->height();
    this->width  = this->screen()->width();
+   this->background = this->screen()->getColor( "white" );
+   this->borderWidth = 3;
+   this->border = this->background;
 
-   if (this->parent)
-   {
-      this->background  = this->parent->background;
-      this->borderWidth = this->parent->borderWidth;
-      this->border      = this->parent->border;
-      this->initialize( false );
-   }
-   else // We are creating the root window for this screen.
-   {
-      this->is_open = false;
-      this->background = this->screen()->getColor( "white" );
-      this->borderWidth = 3;
-      this->border = this->background;
-
-      this->xid = RootWindow( this->screen()->display()->xDisplay(), 
-            this->screen()->index() );
-   }
+   this->xid = RootWindow( this->screen()->display()->xDisplay(), 
+         this->screen()->index() );
 }
-
-/*
-Window::Window( Window *parent, 
-      int originX, int originY, int width, int height ) :
-            parent( parent ), originX( originX ), originY( originY ), 
-            width( width ), height( height ) {
-
-   XSetWindowAttributes attributes;
-//   XSizeHints           sizeHints;
-   unsigned long        mask = 0;
-
-   background = parent->getBackground();
-   border = parent->border;
-   borderWidth = parent->borderWidth;
-   display = parent->display;
-   screen = parent->screen;
-   is_open = false;
-
-   attributes.border_pixel     = border->getPixel();
-   mask |= CWBorderPixel;
-   attributes.background_pixel = background->getPixel();
-   mask |= CWBackPixel;
-   attributes.override_redirect = True;
-   mask |= CWOverrideRedirect;
-
-   xid = XCreateWindow( display->xDisplay(), parent->getXID(), 
-         originX, originY, width, height, borderWidth,
-         display->screen( screen )->colorDepth(),
-         InputOutput, CopyFromParent, mask, &attributes );
-
-   sizeHints.x      = originX;
-   sizeHints.y      = originY;
-   sizeHints.width  = width;
-   sizeHints.height = height;
-   sizeHints.flags  = PPosition | PSize;
-
-   XSetNormalHints( display->xDisplay(), getXID(), &sizeHints );
-}
-*/
 
 XX::Window::Window( XX::Screen *scr,
       int originX, int originY, int width, int height, XX::Color *background,
@@ -140,13 +90,13 @@ void XX::Window::initialize( bool overrideRedirect ) {
    XSetWindowAttributes attributes;
    unsigned long        mask = 0;
 
-   if (background == NULL) {
+   if (background == nullptr) {
       background = parent->background;
    }
    if (borderWidth < 0) {
       borderWidth = parent->borderWidth;
    }
-   if (border == NULL) {
+   if (border == nullptr) {
       border = parent->border;
    }
    is_open = false;
@@ -205,10 +155,11 @@ void XX::Window::listenFor( unsigned long events ) {
 
 XEvent *XX::Window::getNextEvent( XEvent *event, bool block ) {
    if (block) {
-      XWindowEvent( this->screen()->display()->xDisplay(), getXID(), eventMask, event );
-   } else if (!XCheckWindowEvent( this->screen()->display()->xDisplay(), getXID(), 
-            eventMask, event )) {
-      return NULL;
+      XWindowEvent( this->screen()->display()->xDisplay(), getXID(), 
+            eventMask, event );
+   } else if (!XCheckWindowEvent( this->screen()->display()->xDisplay(), 
+            getXID(), eventMask, event )) {
+      return nullptr;
    }
    return event;
 }
@@ -216,10 +167,11 @@ XEvent *XX::Window::getNextEvent( XEvent *event, bool block ) {
 XEvent *XX::Window::getNextEvent( XEvent *event, unsigned long eventTypes, 
       bool block ) {
    if (block) {
-      XWindowEvent( this->screen()->display()->xDisplay(), getXID(), eventTypes, event );
-   } else if (!XCheckWindowEvent( this->screen()->display()->xDisplay(), getXID(), 
-            eventTypes, event )) {
-      return NULL;
+      XWindowEvent( this->screen()->display()->xDisplay(), getXID(), 
+            eventTypes, event );
+   } else if (!XCheckWindowEvent( this->screen()->display()->xDisplay(), 
+            getXID(), eventTypes, event )) {
+      return nullptr;
    }
    return event;
 }

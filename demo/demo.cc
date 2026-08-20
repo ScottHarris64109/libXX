@@ -525,7 +525,7 @@ void scribble( XX::GC *gc, XX::Color *color1, XX::Color *color2 ) {
    gc->setForeground( color1 );
    gc->drawText( 10, 400, "Hello, World!" );
 
-   gc->getWindow()->getDisplay()->flush();
+   gc->getWindow()->display()->flush();
 }
 
 std::string modState( unsigned int eventState ) {

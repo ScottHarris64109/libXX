@@ -15,9 +15,8 @@ namespace XX {
    class Screen;
 
 /**
- * @brief Display is an X11 Display object.  
- * In hardware terms it represents a display card driving at least one 
- * display screen.
+ * @brief Display wraps an X11 Display object.  
+ * It represents a display card or X11 server driving at least one screen.
  * <p>
  * Screens are numbered 0 through screenCount()-1.  If a screen number 
  * parameter is omitted or passed as -1, the default screen -- usually 0 --

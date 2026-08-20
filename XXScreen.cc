@@ -44,7 +44,6 @@ XX::Screen::Screen( XX::Display *display, int index ) :
    this->width_ = DisplayWidth( this->display()->xDisplay(), this->index() );
    this->height_ = DisplayHeight( this->display()->xDisplay(), this->index() );
    this->colorDepth_ = DefaultDepth( this->display()->xDisplay(), this->index() );
-   this->root_ = nullptr;
    this->root_ = new XX::Window( this );
 }
 

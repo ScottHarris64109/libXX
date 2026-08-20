@@ -19,6 +19,8 @@ namespace XX {
  */
 
 class Window {
+   // Screen needs the root Window constructor.
+   friend class Screen;
 
 private:
    XX::Screen *screen_;
@@ -35,6 +37,8 @@ private:
    int        borderWidth;
    unsigned long eventMask;
 
+   Window( XX::Screen *s );  // Screen root constructor
+
    void initialize( bool overrideRedirect );
 
 protected:
@@ -44,23 +48,23 @@ public:
 
    virtual ~Window();
 
-   Window( XX::Screen *s );
-
    Window( XX::Screen *screen, int atX, int atY, int width, int height, 
-        XX::Color *background=NULL, int borderWidth=-1, 
-        XX::Color *borderColor=NULL, bool overrideRedirect=false );
+        XX::Color *background=nullptr, int borderWidth=-1, 
+        XX::Color *borderColor=nullptr, bool overrideRedirect=false );
 
    Window( Window *parent, int atX, int atY, int width, int height, 
-        XX::Color *background=NULL, int borderWidth=-1, 
-        XX::Color *borderColor=NULL, bool overrideRedirect=false );
+        XX::Color *background=nullptr, int borderWidth=-1, 
+        XX::Color *borderColor=nullptr, bool overrideRedirect=false );
 
    //== Accessors ==============================================================
 
    inline ::Window getXID( void ) const { return xid; }
-   inline XX::Display *getDisplay( void ) const { return this->screen()->display(); }
+   inline XX::Display *display( void ) const { 
+      return this->screen()->display(); 
+   }
+   inline XX::Screen *screen( void ) const { return this->screen_; }
    inline XX::Color *getBackground( void ) const { return background; }
    inline bool isOpen( void ) const { return is_open; }
-   inline XX::Screen *screen( void ) const { return this->screen_; }
    inline int getWidth( void ) const { return width; }
    inline int getHeight( void ) const { return height; }
 
