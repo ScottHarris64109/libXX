@@ -7,6 +7,7 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include "XXDisplay.hh"
+#include "XXColor.hh"
 
 namespace XX {
 
@@ -31,6 +32,7 @@ public:
    virtual ~PixMap();
    PixMap( XX::Window *window, int width, int height );
    PixMap( XX::Window *window, int width, int height, const char *bitMap );
+   PixMap( XX::Window *window, int width, int height, const XX::Color *pixel );
 
    //== Accessors ==============================================================
 
