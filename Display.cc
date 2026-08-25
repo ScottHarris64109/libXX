@@ -1,5 +1,5 @@
 /*#############################################################################
- * XXDisplay.cc -- Display card/server.
+ * XX::Display.cc -- Display card/server.
  *
  *  Copyright (C) 2012,2016,2026 by Scott Harris.  
  *
@@ -22,9 +22,9 @@
 #include <stdexcept>
 #include <iostream>
 
-#include "XXDisplay.hh"
-#include "XXScreen.hh"
-#include "XXColor.hh"
+#include "Display.hh"
+#include "Screen.hh"
+#include "Color.hh"
 
 #define BUFFER_SIZE 255
 

@@ -1,5 +1,5 @@
 /*#############################################################################
- * XXPixMap.cc -- Pixel map.
+ * XX::PixMap.cc -- Pixel map.
  *
  *  Copyright (C) 2012,2015,2026 by Scott Harris.  
  *
@@ -24,9 +24,9 @@
 //#include <errno.h>
 #include <cstdint>
 
-#include "XXDisplay.hh"
-#include "XXWindow.hh"
-#include "XXPixMap.hh"
+#include "Display.hh"
+#include "Window.hh"
+#include "PixMap.hh"
 
 //== Constructors =============================================================
 

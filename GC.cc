@@ -1,5 +1,5 @@
 /*#############################################################################
- * XXGC.cc -- Wrapper for an X11 GC (Graphics Context).
+ * XX::GC.cc -- Wrapper for an X11 GC (Graphics Context).
  *
  *  Copyright (C) 2012,2015,2026 by Scott Harris.  All rights reserved.
  *
@@ -23,12 +23,12 @@
 //#include <stdlib.h>
 //#include <errno.h>
 
-#include "XXDisplay.hh"
-#include "XXWindow.hh"
-#include "XXPixMap.hh"
-#include "XXColor.hh"
-#include "XXGC.hh"
-#include "XXFont.hh"
+#include "Display.hh"
+#include "Window.hh"
+#include "PixMap.hh"
+#include "Color.hh"
+#include "GC.hh"
+#include "Font.hh"
 
 //== Constructors =============================================================
 

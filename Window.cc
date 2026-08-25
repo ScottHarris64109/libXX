@@ -1,5 +1,5 @@
 /*#############################################################################
- * XXWindow.cc -- Window class code.
+ * XX::Window.cc -- Window class code.
  * Copyright (C) 2012,2016,2026 by Scott Harris.  
  *
  *  This library is free software: you can redistribute it and/or modify
@@ -21,10 +21,10 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 
-#include "XXDisplay.hh"
-#include "XXWindow.hh"
-#include "XXScreen.hh"
-#include "XXColor.hh"
+#include "Display.hh"
+#include "Window.hh"
+#include "Screen.hh"
+#include "Color.hh"
 
 //== Constructors =============================================================
 

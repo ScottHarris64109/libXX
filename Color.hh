@@ -1,8 +1,8 @@
-// XXColor.hh -- 24-bit color.
+// XX::Color.hh -- 24-bit color.
 // Copyright (C) 2014,2015,2026 by Scott Harris.  
 
-#ifndef XXCOLOR_HH_
-#define XXCOLOR_HH_
+#ifndef XX_COLOR_HH_
+#define XX_COLOR_HH_
 
 #include <string>
 
@@ -86,4 +86,4 @@ public:
 }; // class
 }; // namespace
 
-#endif /* XXCOLOR_HH_ */
+#endif /* XX_COLOR_HH_ */

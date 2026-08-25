@@ -1,5 +1,5 @@
 /*#############################################################################
- * XXScreen.cc -- Screen class code.
+ * XX::Screen.cc -- Screen class code.
  * Copyright (C) 2026 by Scott Harris.  
  *
  *  This library is free software: you can redistribute it and/or modify
@@ -21,9 +21,9 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 
-#include "XXDisplay.hh"
-#include "XXScreen.hh"
-#include "XXWindow.hh"
+#include "Display.hh"
+#include "Screen.hh"
+#include "Window.hh"
 
 //== Constructors =============================================================
 

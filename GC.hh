@@ -1,16 +1,16 @@
-// XXGC.hh -- Wrapper for an X11 GC (Graphics Context).
+// XX::GC.hh -- Wrapper for an X11 GC (Graphics Context).
 // Copyright (C) 2014,2015,2026 by Scott Harris.  All rights reserved.
 
-#ifndef XXGC_HH_
-#define XXGC_HH_
+#ifndef XX_GC_HH_
+#define XX_GC_HH_
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
-#include "XXDisplay.hh"
-#include "XXWindow.hh"
-#include "XXColor.hh"
-#include "XXPixMap.hh"
-#include "XXFont.hh"
+#include "Display.hh"
+#include "Window.hh"
+#include "Color.hh"
+#include "PixMap.hh"
+#include "Font.hh"
 
 namespace XX {
 
@@ -93,4 +93,4 @@ public:
 }; // class
 }; // namespace
 
-#endif /* GC_HH_ */
+#endif /* XX_GC_HH_ */

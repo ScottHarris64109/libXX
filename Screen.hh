@@ -1,11 +1,11 @@
-// XXScreen.hh
+// XX::Screen.hh
 // Copyright (C) 2016 by Scott Harris.  All rights reserved.
 
-#ifndef XXSCREEN_HH_
-#define XXSCREEN_HH_
+#ifndef XX_SCREEN_HH_
+#define XX_SCREEN_HH_
 
-#include "XXDisplay.hh"
-#include "XXColor.hh"
+#include "Display.hh"
+#include "Color.hh"
 
 namespace XX {
    class Window;
@@ -62,4 +62,4 @@ public:
 }; // class
 }; // namespace
 
-#endif /* XXSCREEN_HH_ */
+#endif /* XX_SCREEN_HH_ */

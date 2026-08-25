@@ -1,12 +1,12 @@
-// XXFont.hh -- Font wrapper.
+// XX::Font.hh -- Font wrapper.
 // Copyright (C) 2014,2015,2026 by Scott Harris.  
 
-#ifndef XXFONT_HH_
-#define XXFONT_HH_
+#ifndef XX_FONT_HH_
+#define XX_FONT_HH_
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
-#include "XXDisplay.hh"
+#include "Display.hh"
 
 namespace XX {
 
@@ -49,4 +49,4 @@ public:
 }; // class
 }; // namespace
 
-#endif /* XXFONT_HH_ */
+#endif /* XX_FONT_HH_ */

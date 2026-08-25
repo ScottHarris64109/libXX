@@ -1,12 +1,8 @@
-// XXDisplay.hh
+// XX::Display.hh
 // Copyright (C) 2014,2016,2026 by Scott Harris.  All rights reserved.
-/** 
- * \mainpage XX Class Library
- *
- * XX provides C++ wrappers around the X11 library.
- */
-#ifndef XXDISPLAY_HH_
-#define XXDISPLAY_HH_
+
+#ifndef XX_DISPLAY_HH_
+#define XX_DISPLAY_HH_
 
 #include <string>
 #include <X11/Xlib.h>
@@ -68,4 +64,4 @@ public:
 }; // class
 }; // namespace
 
-#endif /* XXDISPLAY_HH_ */
+#endif /* XX_DISPLAY_HH_ */

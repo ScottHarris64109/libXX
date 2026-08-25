@@ -6,12 +6,13 @@
 include ../make.rules
 
 LIBRARY=libXX.a
+LIB_INCDIR=$(INCDIR)/XX
 HTMLDIR=$(DOCDIR)/libXX
 DOCUMENT=doc/html/index.html
 
-HEADERS= XXDisplay.hh XXScreen.hh XXWindow.hh XXPixMap.hh XXColor.hh XXGC.hh XXFont.hh 
-MODULES= XXDisplay.cc XXScreen.cc XXWindow.cc XXPixMap.cc XXColor.cc XXGC.cc XXFont.cc
-OBJECTS= XXDisplay.o  XXScreen.o  XXWindow.o  XXPixMap.o  XXColor.o  XXGC.o  XXFont.o  
+HEADERS= Display.hh Screen.hh Window.hh PixMap.hh Color.hh GC.hh Font.hh 
+MODULES= Display.cc Screen.cc Window.cc PixMap.cc Color.cc GC.cc Font.cc
+OBJECTS= Display.o  Screen.o  Window.o  PixMap.o  Color.o  GC.o  Font.o  
 
 $(LIBRARY): $(LIBRARY)( $(OBJECTS) )
 
@@ -26,7 +27,8 @@ clean:
 	rm -rf $(LIBRARY) $(OBJECTS) doc
 
 install:
-	cp $(HEADERS)   $(INCDIR)
+	mkdir -p $(LIB_INCDIR)
+	cp $(HEADERS)   $(LIB_INCDIR)
 	cp $(LIBRARY)   $(LIBDIR)
 	mkdir -p $(HTMLDIR)
 	cp -R doc/html $(HTMLDIR)

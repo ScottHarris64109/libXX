@@ -1,17 +1,17 @@
-// XXWindow.hh -- XX Window class header.
+// XX::Window.hh -- XX Window class header.
 // Copyright (C) 2014,2016,2026 by Scott Harris.  All rights reserved.
 
-#ifndef XXWINDOW_HH_
-#define XXWINDOW_HH_
+#ifndef XX_WINDOW_HH_
+#define XX_WINDOW_HH_
 
 #include <unordered_map>
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
-#include "XXDisplay.hh"
+#include "Display.hh"
 
-#include "XXScreen.hh"
-#include "XXColor.hh"
+#include "Screen.hh"
+#include "Color.hh"
 
 namespace XX {
 /**
@@ -86,4 +86,4 @@ public:
 }; // class
 }; // namespace
 
-#endif /* XXWINDOW_HH_ */
+#endif /* XX_WINDOW_HH_ */

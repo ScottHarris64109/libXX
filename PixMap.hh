@@ -1,13 +1,13 @@
-// XXPixMap.hh -- Pixel map.
+// XX::PixMap.hh -- Pixel map.
 // Copyright (C) 2014,2015,2026 by Scott Harris.  
 
-#ifndef XXPIXMAP_HH_
-#define XXPIXMAP_HH_
+#ifndef XX_PIXMAP_HH_
+#define XX_PIXMAP_HH_
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
-#include "XXDisplay.hh"
-#include "XXColor.hh"
+#include "Display.hh"
+#include "Color.hh"
 
 namespace XX {
 
@@ -45,4 +45,4 @@ public:
 }; // class
 }; // namespace
 
-#endif /* XXPIXMAP_HH_ */
+#endif /* XX_PIXMAP_HH_ */

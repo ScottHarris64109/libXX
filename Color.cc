@@ -1,7 +1,7 @@
 /*#############################################################################
- * XXFont.cc -- X11 Font wrapper.
+ * XX::Color.cc -- 24-bit color.
  *
- *  Copyright (C) 2012,2016,2026 by Scott Harris.  
+ *  Copyright (C) 2012-2026 by Scott Harris.  All rights reserved.
  *
  *  This library is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,33 +18,35 @@
  *#############################################################################
  */
 #include <string>
+#include <string.h>
+#include <stdexcept>
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 
-#include "XXDisplay.hh"
-#include "XXFont.hh"
+#include "Color.hh"
 
 //== Constructors =============================================================
 
-/**
- *  Destroy and deallocate a Font object.
- */
-
-XX::Font::~Font( ) {
-   XFreeFont( this->display->xDisplay(), this->xfont );
+XX::Color::~Color( ) {
 }
 
-/**
- *  Get the named Font from the Display.
- */
-
-XX::Font::Font( XX::Display *display, const char *fontName ) : display{display} {
-   xfont = XLoadQueryFont( display->xDisplay(), fontName );
-   name = std::string( fontName );
+XX::Color::Color( unsigned int red, unsigned int green, unsigned int blue ) {
+   setRed( red );
+   setGreen( green );
+   setBlue( blue );
 }
 
-XX::Font::Font( XX::Display *display, const std::string name ) : 
-   display{ display }, name{ name } {
-   xfont = XLoadQueryFont( display->xDisplay(), name.c_str() );
+//== Accessors ================================================================
+
+void XX::Color::setRed( unsigned int value ) {
+   red = value % 256;
+}
+
+void XX::Color::setGreen( unsigned int value ) {
+   green = value % 256;
+}
+
+void XX::Color::setBlue( unsigned int value ) {
+   blue = value % 256;
 }

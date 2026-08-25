@@ -29,10 +29,10 @@
 #include <X11/keysymdef.h>
 #include <X11/Xproto.h>
 
-#include <XXDisplay.hh>
-#include <XXWindow.hh>
-#include <XXColor.hh>
-#include <XXGC.hh>
+#include <XX/Display.hh>
+#include <XX/Window.hh>
+#include <XX/Color.hh>
+#include <XX/GC.hh>
 
 #define BUFFER_SIZE 255
 
