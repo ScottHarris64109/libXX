@@ -14,6 +14,7 @@
 #include "Color.hh"
 
 namespace XX {
+   class PixMap;
 /**
  * @brief Window is a wrapper around an X11 Window.
  */
@@ -39,7 +40,7 @@ private:
 
    Window( XX::Screen *s );  // Screen root constructor
 
-   void initialize( bool overrideRedirect );
+   void initialize( bool overrideRedirect, XX::PixMap *icon );
 
 protected:
 
@@ -50,11 +51,13 @@ public:
 
    Window( XX::Screen *screen, int atX, int atY, int width, int height, 
         XX::Color *background=nullptr, int borderWidth=-1, 
-        XX::Color *borderColor=nullptr, bool overrideRedirect=false );
+        XX::Color *borderColor=nullptr, bool overrideRedirect=false,
+        XX::PixMap *icon=nullptr );
 
    Window( Window *parent, int atX, int atY, int width, int height, 
         XX::Color *background=nullptr, int borderWidth=-1, 
-        XX::Color *borderColor=nullptr, bool overrideRedirect=false );
+        XX::Color *borderColor=nullptr, bool overrideRedirect=false,
+        XX::PixMap *icon=nullptr );
 
    //== Accessors ==============================================================
 

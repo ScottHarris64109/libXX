@@ -25,6 +25,7 @@
 #include <cstdint>
 
 #include "Display.hh"
+#include "Screen.hh"
 #include "Window.hh"
 #include "PixMap.hh"
 
@@ -38,7 +39,17 @@ XX::PixMap::~PixMap( ) {
 }
 
 /**
- * Create an PixMap for an Window.
+ * Create a PixMap for a Screen.
+ */
+XX::PixMap::PixMap( XX::Screen *screen, int width, int height ) : 
+         window( screen->rootWindow() ), width( width ), height( height ) {
+   id = XCreatePixmap( window->display()->xDisplay(),
+         window->getXID(), width, height, window->getColorDepth() );
+   depth = window->getColorDepth();
+}
+
+/**
+ * Create a PixMap for a Window.
  */
 XX::PixMap::PixMap( XX::Window *window, int width, int height ) : 
          window( window ), width( width ), height( height ) {
@@ -47,51 +58,3 @@ XX::PixMap::PixMap( XX::Window *window, int width, int height ) :
    depth = window->getColorDepth();
 }
 
-XX::PixMap::PixMap( XX::Window *window, int width, int height, 
-     const char *bitMap /* width*height/8 */ ) : 
-         window( window ), width( width ), height( height ) {
-   id = XCreateBitmapFromData( window->display()->xDisplay(),
-         window->getXID(), bitMap, width, height );
-   depth = 1;
-}
-
-XX::PixMap::PixMap( XX::Window *window, int width, int height, 
-     const XX::Color *pixel /* [row][column] */ ) : 
-         window( window ), width( width ), height( height ) {
-   id = XCreatePixmap( window->display()->xDisplay(),
-         window->getXID(), width, height, window->getColorDepth() );
-   depth = window->getColorDepth();
-   uint32_t buffer[100];
-/*
-https://tronche.com/gui/x/xlib/utilities/XCreatePixmapFromBitmapData.html
-
-Pixmap XCreatePixmapFromBitmapData(display, d, data, width, height, fg, bg, depth)
-     Display *display;
-     Drawable d;
-     char *data;
-     unsigned int width, height;
-     unsigned long fg, bg;
-     unsigned int depth;
-
-Arguments
-display 	Specifies the connection to the X server.
-d 	Specifies the drawable that indicates the screen.
-data 	Specifies the data in bitmap format.
-width
-height 	Specify the width and height.
-fg
-bg 	Specify the foreground and background pixel values to use.
-depth 	Specifies the depth of the pixmap. 
-
-/+ XPM +/
-static char * XFACE[] = {
-"48 4 2 1", // width, height, colors, characters per pixel
-"a c #ffffff",
-"b c #000000",
-"abaabaababaaabaabababaabaabaababaabaaababaabaaab",
-"abaabaababaaabaabababaabaabaababaabaaababaabaaab",
-"abaabaababaaabaabababaabaabaababaabaaababaabaaab",
-"abaabaababaaabaabababaabaabaababaabaaababaabaaab"
-};
-*/
-}

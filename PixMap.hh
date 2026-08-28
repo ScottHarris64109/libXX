@@ -10,6 +10,8 @@
 #include "Color.hh"
 
 namespace XX {
+   class Screen;
+   class Window;
 
 /**
  * @brief PixMap is an object wrapper for an X11 PixMap.
@@ -30,9 +32,8 @@ public:
    //== Constructors ===========================================================
 
    virtual ~PixMap();
+   PixMap( XX::Screen *screen, int width, int height );
    PixMap( XX::Window *window, int width, int height );
-   PixMap( XX::Window *window, int width, int height, const char *bitMap );
-   PixMap( XX::Window *window, int width, int height, const XX::Color *pixel );
 
    //== Accessors ==============================================================
 

@@ -31,6 +31,7 @@
 
 #include <XX/Display.hh>
 #include <XX/Window.hh>
+#include <XX/PixMap.hh>
 #include <XX/Color.hh>
 #include <XX/GC.hh>
 
@@ -68,13 +69,14 @@ int main( int argc, char *argv[] ) {
    std::string fg1name = getArg( arg, "-foreground", 0, "black" );
    std::string fg2name = getArg( arg, "-foreground", 1, "red" );
    std::string bgname  = getArg( arg, "-background", 0, "white" );
-   XX::Display *display;
-   XX::Window *window;
-   XX::Color *fg1   = NULL;
-   XX::Color *fg2 = NULL;
-   XX::Color *background = NULL;
-   XX::GC *gc;
-   XX::Font *font;
+   XX::Display *display = nullptr;
+   XX::Window *window = nullptr;
+   XX::PixMap *icon = nullptr;
+   XX::Color *fg1   = nullptr;
+   XX::Color *fg2 = nullptr;
+   XX::Color *background = nullptr;
+   XX::GC *gc = nullptr;
+   XX::Font *font = nullptr;
 
    signal( SIGABRT, signalHandler );
    signal( SIGTERM, signalHandler );
@@ -102,7 +104,22 @@ int main( int argc, char *argv[] ) {
    fg2 = display->screen()->getColor( fg2name );
    std::cout << "Got colors.\n";
 
-   window = new XX::Window( display->screen(), 500, 100, 500, 500, background );
+   icon = new XX::PixMap( display->screen(), 24, 24 );
+   gc = new XX::GC( icon );
+   gc->setForeground( background );
+   gc->fillRectangle( 0,0, 24,24 );
+   gc->setBackground( background );
+   gc->setForeground( fg1 );
+   gc->drawLine( 0, 0, 16, 12 );
+   gc->drawLine( 16, 12, 0, 24 );
+   gc->setForeground( fg2 );
+   gc->drawLine( 24, 0, 8, 12 );
+   gc->drawLine( 8, 12, 24, 24 );
+   delete gc;
+   gc = nullptr;
+
+   window = new XX::Window( display->screen(), 500, 100, 500, 500, background, 
+       -1, nullptr, false, icon );
    std::cout << "Got window.\n";
 
    gc = new XX::GC( window );
@@ -120,6 +137,7 @@ int main( int argc, char *argv[] ) {
 
    delete font;
    delete gc;
+   delete icon;
    delete window;
    delete display;
    exit( EXIT_SUCCESS );

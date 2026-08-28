@@ -22,9 +22,10 @@
 #include <X11/Xutil.h>
 
 #include "Display.hh"
-#include "Window.hh"
 #include "Screen.hh"
+#include "Window.hh"
 #include "Color.hh"
+#include "PixMap.hh"
 
 //== Constructors =============================================================
 
@@ -65,28 +66,30 @@ XX::Window::Window( XX::Screen *scr ) : screen_{ scr } {
 
 XX::Window::Window( XX::Screen *scr,
       int originX, int originY, int width, int height, XX::Color *background,
-      int borderWidth, XX::Color *border, bool overrideRedirect ) :
+      int borderWidth, XX::Color *border, bool overrideRedirect, 
+      XX::PixMap *icon ) :
             screen_( scr ), 
             originX( originX ), originY( originY ), 
             width( width ), height( height ), background( background ),
             borderWidth( borderWidth ), border( border ) {
 
    parent = this->screen()->rootWindow();
-   initialize( overrideRedirect );
+   initialize( overrideRedirect, icon );
 }
 
 XX::Window::Window( XX::Window *parent, 
       int originX, int originY, int width, int height, XX::Color *background,
-      int borderWidth, XX::Color *border, bool overrideRedirect ) :
+      int borderWidth, XX::Color *border, bool overrideRedirect,
+      XX::PixMap *icon ) :
             parent( parent ), originX( originX ), originY( originY ), 
             width( width ), height( height ), background( background ),
             borderWidth( borderWidth ), border( border ) {
 
    screen_ = parent->screen();
-   initialize( overrideRedirect );
+   initialize( overrideRedirect, icon );
 }
 
-void XX::Window::initialize( bool overrideRedirect ) {
+void XX::Window::initialize( bool overrideRedirect, XX::PixMap *icon ) {
    XSetWindowAttributes attributes;
    unsigned long        mask = 0;
 
@@ -115,6 +118,17 @@ void XX::Window::initialize( bool overrideRedirect ) {
          InputOutput, CopyFromParent, mask, &attributes );
 
    this->parent->children[ this->getXID() ] = this;
+
+   if (icon) {
+      XWMHints hint;
+
+      hint.icon_pixmap = icon->getXPixmap();
+      hint.initial_state = NormalState;
+      hint.flags = IconPixmapHint | StateHint;
+
+      XSetWMHints( this->screen()->display()->xDisplay(), this->getXID(), 
+         &hint );
+   }
 }
 
 //== Accessors ================================================================

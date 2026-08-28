@@ -31,6 +31,8 @@ class Screen {
    friend class Display;
    // The Window class needs to be able to see the root Window.
    friend class Window;
+   // The PixMap class needs to be able to see the root Window.
+   friend class PixMap;
 
 private:
    int index_;
