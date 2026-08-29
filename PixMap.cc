@@ -26,6 +26,7 @@
 
 #include "Display.hh"
 #include "Screen.hh"
+#include "Drawable.hh"
 #include "Window.hh"
 #include "PixMap.hh"
 
@@ -35,26 +36,34 @@
  *  Destroy and deallocate a PixMap object.
  */
 XX::PixMap::~PixMap( ) {
-   XFreePixmap( window->display()->xDisplay(), id );
+   XFreePixmap( this->getWindow()->display()->xDisplay(), this->getXID() );
 }
 
 /**
  * Create a PixMap for a Screen.
  */
 XX::PixMap::PixMap( XX::Screen *screen, int width, int height ) : 
-         window( screen->rootWindow() ), width( width ), height( height ) {
-   id = XCreatePixmap( window->display()->xDisplay(),
+         Drawable( screen->display() ),
+         window( screen->rootWindow() ) {
+   this->xid = XCreatePixmap( window->display()->xDisplay(),
          window->getXID(), width, height, window->getColorDepth() );
-   depth = window->getColorDepth();
+   this->height = height;
+   this->width  = width;
+   this->depth = window->getColorDepth();
+   this->makeContext();
 }
 
 /**
  * Create a PixMap for a Window.
  */
 XX::PixMap::PixMap( XX::Window *window, int width, int height ) : 
-         window( window ), width( width ), height( height ) {
-   id = XCreatePixmap( window->display()->xDisplay(),
+         Drawable( window->display() ),
+         window( window ) {
+   this->xid = XCreatePixmap( window->display()->xDisplay(),
          window->getXID(), width, height, window->getColorDepth() );
-   depth = window->getColorDepth();
+   this->height = height;
+   this->width  = width;
+   this->depth = window->getColorDepth();
+   this->makeContext();
 }
 

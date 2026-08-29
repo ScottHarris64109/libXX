@@ -1,14 +1,15 @@
 // XX::Screen.hh
-// Copyright (C) 2016 by Scott Harris.  All rights reserved.
+// Copyright (C) 2026 by Scott Harris.  All rights reserved.
 
 #ifndef XX_SCREEN_HH_
 #define XX_SCREEN_HH_
 
 #include "Display.hh"
-#include "Color.hh"
 
 namespace XX {
    class Window;
+   class PixMap;
+   class Color;
 
 /**
  * @brief Screen is a physical display device/monitor.
@@ -40,14 +41,14 @@ private:
    int height_;
    int colorDepth_;
    Display *display_;
+
+protected:
    Window *root_;
 
    Screen( Display *display, int index );
    virtual ~Screen();
 
    inline Window *rootWindow() const { return root_; };
-
-protected:
 
 public:
    //== Accessors ==============================================================
@@ -59,7 +60,6 @@ public:
    inline Display *display() const { return display_; };
 
    Color *getColor( const std::string name );
-   Color *getColor( const char *name );
 
 }; // class
 }; // namespace

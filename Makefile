@@ -10,9 +10,12 @@ LIB_INCDIR=$(INCDIR)/XX
 HTMLDIR=$(DOCDIR)/libXX
 DOCUMENT=doc/html/index.html
 
-HEADERS= Display.hh Screen.hh Window.hh PixMap.hh Color.hh GC.hh Font.hh 
-MODULES= Display.cc Screen.cc Window.cc PixMap.cc Color.cc GC.cc Font.cc
-OBJECTS= Display.o  Screen.o  Window.o  PixMap.o  Color.o  GC.o  Font.o  
+HEADERS= Display.hh Screen.hh Drawable.hh Window.hh PixMap.hh \
+   Color.hh Font.hh 
+MODULES= Display.cc Screen.cc Drawable.cc Window.cc PixMap.cc \
+   Color.cc Font.cc
+OBJECTS= Display.o  Screen.o  Drawable.o  Window.o  PixMap.o  \
+   Color.o  Font.o  
 
 $(LIBRARY): $(LIBRARY)( $(OBJECTS) )
 

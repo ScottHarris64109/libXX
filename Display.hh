@@ -21,7 +21,7 @@ namespace XX {
 class Display {
 
 private:
-   const char *name_;
+   std::string name_;
    ::Display *xdisplay;
    Screen **screen_;
 
@@ -32,9 +32,7 @@ protected:
 public:
    //== Constructors ===========================================================
 
-   Display();
-   Display( const char *displayName );
-   Display( std::string displayName );
+   Display( std::string displayName="" );
 
    virtual ~Display();
 
@@ -43,7 +41,7 @@ public:
    /// Get the X11 Display pointer wrapped by this Display.
    inline ::Display *xDisplay( void ) const { return xdisplay; }
 
-   std::string name( void ) const;
+   inline std::string name( void ) const { return this->name_; };
    std::string vendorName( void ) const;
    int vendorRelease( void ) const;
    int protocolVersion( void ) const;

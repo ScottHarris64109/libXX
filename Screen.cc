@@ -17,6 +17,7 @@
  *#############################################################################
  */
 #include <cstring>
+#include <iostream>
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
@@ -24,6 +25,7 @@
 #include "Display.hh"
 #include "Screen.hh"
 #include "Window.hh"
+#include "Color.hh"
 
 //== Constructors =============================================================
 
@@ -53,36 +55,26 @@ XX::Screen::Screen( XX::Display *display, int index ) :
  * @return the Color or nullptr
  */
 
-XX::Color *XX::Screen::getColor( const char *name ) {
+XX::Color *XX::Screen::getColor( const std::string name ) {
    XColor definition, hardwareColor;
    int found = 0;
    char softName[ 255 ];
    XX::Color *color = nullptr;
 
-   if (strlen(name) < 255)
+   if (name.length() < 255)
    {
-      strcpy( softName, name );
+      strcpy( softName, name.c_str() );
       found = XLookupColor( this->display()->xDisplay(), 
             DefaultColormap( this->display()->xDisplay(), this->index() ),
             softName, &definition, &hardwareColor );
    }
 
-   if (found == 0) {
-      //throw std::runtime_error( "No such color." );
-   } else {
+   if (found) {
       color = new XX::Color( definition.red, definition.green, 
             definition.blue );
+   } else {
+      //throw std::runtime_error( "No such color." );
    }
 
    return color;
-}
-
-/**
- *  Look up a color by name.
- *
- * @return the Color or nullptr
- */
-
-XX::Color *XX::Screen::getColor( const std::string name ) {
-   return this->getColor( name.c_str() );
 }

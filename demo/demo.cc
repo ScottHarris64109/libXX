@@ -33,7 +33,7 @@
 #include <XX/Window.hh>
 #include <XX/PixMap.hh>
 #include <XX/Color.hh>
-#include <XX/GC.hh>
+#include <XX/Font.hh>
 
 #define BUFFER_SIZE 255
 
@@ -57,8 +57,9 @@ bool finished = false;
 std::multimap<std::string,std::string> parse_args( int argc, char *argv[] );
 std::string getArg( const std::multimap<std::string,std::string> &arg, 
       std::string key, int index=0, std::string defaultValue = "" );
-void scribble( XX::GC *gc, XX::Color *color1, XX::Color *color2 );
-void loop( XX::Display *display, XX::Window *window, XX::GC *gc, XX::Font *font, 
+void scribble( XX::Window *window, XX::Font *font, XX::Color *color1, 
+      XX::Color *color2 );
+void loop( XX::Display *display, XX::Window *window, XX::Font *font, 
       XX::Color *fg1, XX::Color *fg2 );
 std::string modState( unsigned int eventState );
 extern "C" void signalHandler( int theSignal );
@@ -75,7 +76,6 @@ int main( int argc, char *argv[] ) {
    XX::Color *fg1   = nullptr;
    XX::Color *fg2 = nullptr;
    XX::Color *background = nullptr;
-   XX::GC *gc = nullptr;
    XX::Font *font = nullptr;
 
    signal( SIGABRT, signalHandler );
@@ -105,38 +105,27 @@ int main( int argc, char *argv[] ) {
    std::cout << "Got colors.\n";
 
    icon = new XX::PixMap( display->screen(), 24, 24 );
-   gc = new XX::GC( icon );
-   gc->setForeground( background );
-   gc->fillRectangle( 0,0, 24,24 );
-   gc->setBackground( background );
-   gc->setForeground( fg1 );
-   gc->drawLine( 0, 0, 16, 12 );
-   gc->drawLine( 16, 12, 0, 24 );
-   gc->setForeground( fg2 );
-   gc->drawLine( 24, 0, 8, 12 );
-   gc->drawLine( 8, 12, 24, 24 );
-   delete gc;
-   gc = nullptr;
+   icon->fillRectangle( background, 0,0, 24,24 );
+   icon->drawLine( fg1, 0, 0, 16, 12 );
+   icon->drawLine( fg1, 16, 12, 0, 24 );
+   icon->drawLine( fg2, 24, 0, 8, 12 );
+   icon->drawLine( fg2, 8, 12, 24, 24 );
 
    window = new XX::Window( display->screen(), 500, 100, 500, 500, background, 
        -1, nullptr, false, icon );
    std::cout << "Got window.\n";
 
-   gc = new XX::GC( window );
-
    font = new XX::Font( display, "variable" );
-   gc->setFont( font );
 
    window->open( true );
 
-   scribble( gc, fg1, fg2 );
+   scribble( window, font, fg1, fg2 );
 
-   loop( display, window, gc, font, fg1, fg2 );
+   loop( display, window, font, fg1, fg2 );
 
    window->close( true );
 
    delete font;
-   delete gc;
    delete icon;
    delete window;
    delete display;
@@ -180,7 +169,7 @@ std::string getArg( const std::multimap<std::string,std::string> &arg,
    return it->second;
 }
 
-void loop( XX::Display *display, XX::Window *window, XX::GC *gc, XX::Font *font, 
+void loop( XX::Display *display, XX::Window *window, XX::Font *font, 
       XX::Color *fg1, XX::Color *fg2 ) {
    XEvent event;
    Atom windowClosed;
@@ -208,17 +197,17 @@ void loop( XX::Display *display, XX::Window *window, XX::GC *gc, XX::Font *font,
 
          case Expose:
             std::cout << "Exposed.\n";
-            scribble( gc, fg1, fg2 );
+            scribble( window, font, fg1, fg2 );
             break;
 
          case MapNotify:
             std::cout << "Mapped.\n";
-            scribble( gc, fg1, fg2 );
+            scribble( window, font, fg1, fg2 );
             break;
 
          case ConfigureNotify:
             std::cout << "Reconfigured.\n";
-            scribble( gc, fg1, fg2 );
+            scribble( window, font, fg1, fg2 );
             break;
 
          case ButtonPress:
@@ -533,17 +522,15 @@ void loop( XX::Display *display, XX::Window *window, XX::GC *gc, XX::Font *font,
 
 }
 
-void scribble( XX::GC *gc, XX::Color *color1, XX::Color *color2 ) {
-   gc->setForeground( color1 );
-   gc->drawLine( 10, 10, 50, 50 );
-   gc->drawRectangle( 10, 60, 40, 40 );
-   gc->drawArc( 60, 10, 100, 100, 0.0, 360.0 );
-   gc->setForeground( color2 );
-   gc->fillArc( 60, 20, 90, 90, 0.0, 90.0 );
-   gc->setForeground( color1 );
-   gc->drawText( 10, 400, "Hello, World!" );
+void scribble( XX::Window *window, XX::Font *font, 
+      XX::Color *color1, XX::Color *color2 ) {
+   window->drawLine( color1, 10, 10, 50, 50 );
+   window->drawRectangle( color1, 10, 60, 40, 40 );
+   window->drawArc( color1, 60, 10, 100, 100, 0.0, 360.0 );
+   window->fillArc( color2, 60, 20, 90, 90, 0.0, 90.0 );
+   window->drawText( color1, font, 10, 400, "Hello, World!" );
 
-   gc->getWindow()->display()->flush();
+   window->display()->flush();
 }
 
 std::string modState( unsigned int eventState ) {

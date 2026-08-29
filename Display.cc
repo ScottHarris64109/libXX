@@ -53,46 +53,6 @@ XX::Display::~Display( ) {
    }
 }
 
-/**
- *  Initialize a Display object.  This is to be called by constructors only.
- *
- * @param x X.
- * @return output.
- * @throws Exception if problem.
- */
-
-void XX::Display::init( void ) {
-   if (!XX::X11_hasBeenInitialized) {
-      XX::initializeX11();
-   }
-
-   this->xdisplay = XOpenDisplay( this->name_ );
-   this->name_ = DisplayString( this->xdisplay );
-   screen_ = (XX::Screen **)calloc( this->screenCount(), sizeof(XX::Screen *) );
-   if (!screen_)
-   {
-      fprintf( stderr, "Cannot allocate %d Screens for Display \"%s\".\n",
-            this->screenCount(), this->name_ );
-      std::bad_alloc exception;
-      throw exception;
-   }
-   for (int s = 0; s < this->screenCount(); s++) {
-      screen_[s] = new XX::Screen( this, s );
-   }
-}
-
-/*
- *  Initialize the X11 system (actually, our interaction with it).  This 
- *  should be called before the first Display object is fully instantiated 
- *  and never needs to be called again.
- */
-void XX::initializeX11() {
-      XSetErrorHandler( XX::criticalErrorHandler );
-      XSetIOErrorHandler( XX::fatalErrorHandler );
-
-      XX::X11_hasBeenInitialized = true;
-}
-
 extern "C" int XX::criticalErrorHandler( ::Display *xdisplay, 
       ::XErrorEvent *error ) {
    char text[ BUFFER_SIZE+1 ];
@@ -114,36 +74,31 @@ extern "C" int XX::fatalErrorHandler( ::Display *xdisplay ) {
 }
 
 /**
- *  Connect to the default X11 Display.
- */
-
-XX::Display::Display( ) {
-   this->name_ = NULL;
-   init();
-}
-
-/**
  *  Connect to the named X11 Display.  If no name is given, the default
  *  display (typically "localhost:0.0") will be connected.
  */
 
-XX::Display::Display( const char *displayName ) {
-   if ((displayName != NULL) && (strlen(displayName) == 0)) {
-      this->name_ = NULL;
-   } else {
-      this->name_ = displayName;
+XX::Display::Display( std::string displayName ) : name_( displayName ) {
+
+   if (!XX::X11_hasBeenInitialized) {
+      XSetErrorHandler( XX::criticalErrorHandler );
+      XSetIOErrorHandler( XX::fatalErrorHandler );
+      XX::X11_hasBeenInitialized = true;
    }
-   this->init();
-}
 
-/**
- *  Connect to the named X11 Display.  If no name is given, the default
- *  display (typically "localhost:0.0") will be connected.
- */
-
-XX::Display::Display( std::string displayName ) {
-   this->name_ = (displayName == "") ? NULL: displayName.c_str();
-   this->init();
+   this->xdisplay = XOpenDisplay( this->name_.c_str() );
+   this->name_ = DisplayString( this->xdisplay );
+   screen_ = (XX::Screen **)calloc( this->screenCount(), sizeof(XX::Screen *) );
+   if (!screen_)
+   {
+      fprintf( stderr, "Cannot allocate %d Screens for Display \"%s\".\n",
+            this->screenCount(), this->name().c_str() );
+      std::bad_alloc exception;
+      throw exception;
+   }
+   for (int s = 0; s < this->screenCount(); s++) {
+      screen_[s] = new XX::Screen( this, s );
+   }
 }
 
 //== Operations ===============================================================
@@ -197,17 +152,6 @@ int XX::Display::countPendingEvents( bool flushQueue ) {
    return XPending( this->xDisplay() );
 }
 //== Accessors ================================================================
-
-/**
- *  Return the value of the X11 display name.
- *
- * @return the X11 display name.
- */
-
-std::string XX::Display::name( void ) const {
-   std::string output( XDisplayName( this->name_ ) );
-   return output;
-}
 
 /**
  *  Return the value of the X11 vendor name.

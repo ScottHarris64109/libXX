@@ -7,24 +7,21 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include "Display.hh"
+#include "Drawable.hh"
+#include "Screen.hh"
+#include "Window.hh"
 #include "Color.hh"
 
 namespace XX {
-   class Screen;
-   class Window;
 
 /**
  * @brief PixMap is an object wrapper for an X11 PixMap.
  */
 
-class PixMap {
+class PixMap : public XX::Drawable {
 
 private:
    XX::Window  *window;
-   Pixmap     id;
-   int        height;
-   int        width;
-   int        depth;
 
 protected:
 
@@ -32,16 +29,12 @@ public:
    //== Constructors ===========================================================
 
    virtual ~PixMap();
-   PixMap( XX::Screen *screen, int width, int height );
+   PixMap( XX::Screen *screen, int width, int height ); 
    PixMap( XX::Window *window, int width, int height );
 
    //== Accessors ==============================================================
 
-   inline Pixmap getXPixmap( void ) const { return id; }
    inline XX::Window *getWindow( void ) const { return window; }
-   inline int getWidth( void ) const { return width; }
-   inline int getHeight( void ) const { return height; }
-   inline int getColorDepth( void ) const { return depth; }
 
 }; // class
 }; // namespace
