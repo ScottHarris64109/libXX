@@ -317,3 +317,9 @@ void XX::Window::close( bool immediately ) {
       this->screen()->display()->flush();
    }
 }
+
+void XX::Window::moveTo( int x, int y ) {
+   XMoveWindow( this->screen()->display()->xDisplay(), getXID(), x, y );
+   this->originX = x;
+   this->originY = y;
+}

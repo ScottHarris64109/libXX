@@ -144,6 +144,7 @@ public:
 
    void open( bool immediately=false );
    void close( bool immediately=false );
+   void moveTo( int x, int y );
 
 }; // class
 }; // namespace

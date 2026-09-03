@@ -38,9 +38,10 @@
 #define BUFFER_SIZE 255
 
 typedef struct {
-   XX::Color *color[2];
-   XX::Color *background = nullptr;
-   XX::Font  *font = nullptr;
+   XX::Color  *color[2] = { nullptr, nullptr };
+   XX::Color  *background = nullptr;
+   XX::Font   *font = nullptr;
+   XX::Window *popup = nullptr;
 } GraphicsPreferences;
 
 // Used by error handlers to break the main loop.
@@ -54,10 +55,13 @@ std::string modState( unsigned int eventState );
 extern "C" void signalHandler( int theSignal );
 
 // XX::EventHandlers
-bool onButtonPress( XX::Window *window, XEvent& event, void *unused );
+bool onButtonPress( XX::Window *window, XEvent& event, void *resources );
 bool onButtonRelease( XX::Window *window, XEvent& event, void *unused );
 bool onKeyPress( XX::Window *window, XEvent& event, void *unused );
 bool redraw( XX::Window *window, XEvent& event, void *resources );
+
+bool closePopup( XX::Window *window, XEvent& event, void *unused );
+bool drawPopup( XX::Window *window, XEvent& event, void *resources );
 
 //------------------------------------------------------------------------------
 int main( int argc, char *argv[] ) {
@@ -68,6 +72,7 @@ int main( int argc, char *argv[] ) {
    std::string bgname  = getArg( arg, "-background", 0, "white" );
    XX::Display *display = nullptr;
    XX::Window *window = nullptr;
+   XX::Window *popup = nullptr;
    XX::PixMap *icon = nullptr;
    GraphicsPreferences palette;
 
@@ -105,7 +110,7 @@ int main( int argc, char *argv[] ) {
 
    window = new XX::Window( display->screen(), 500, 100, 500, 500, 
          palette.background, -1, nullptr, false, icon, "libXX demo"  );
-   window->setAction( ButtonPress, onButtonPress, nullptr );
+   window->setAction( ButtonPress, onButtonPress, &palette );
    window->setAction( ButtonRelease, onButtonRelease, nullptr );
    window->setAction( KeyPress, onKeyPress, nullptr );
    window->setAction( Expose, redraw, &palette );
@@ -196,11 +201,24 @@ bool redraw( XX::Window *window, XEvent& event, void *resources ) {
    window->drawRectangle( palette->color[0], 10, 60, 40, 40 );
    window->drawArc( palette->color[0], 60, 10, 100, 100, 0.0, 360.0 );
    window->fillArc( palette->color[1], 60, 20, 90, 90, 0.0, 90.0 );
-   window->drawText( palette->color[0], palette->font, 10, 400, "Hello, World!" );
+   window->drawText( palette->color[0], palette->font, 10, 400, 
+         "Hello, World!" );
 
    window->display()->flush();
    return true;
 }
+
+//------------------------------------------------------------------------------
+bool drawPopup( XX::Window *window, XEvent& event, void *resources ) {
+   GraphicsPreferences *palette = (GraphicsPreferences *)resources;
+
+   window->drawText( palette->color[0], palette->font, 10, 20, 
+         "Popup! Click anywhere to close." );
+
+   window->display()->flush();
+   return true;
+}
+
 
 //------------------------------------------------------------------------------
 std::string modState( unsigned int eventState ) {
@@ -304,12 +322,40 @@ extern "C" void signalHandler( int theSignal ) {
 }
 
 //------------------------------------------------------------------------------
-bool onButtonPress( XX::Window *window, XEvent& event, void *unused ) {
-    // Button 4 = Scroll up
-    // Button 5 = Scroll down
-   std::cout << "Window[" << window->getXID() << "]: ";
-   std::cout << "Pressed " << modState( event.xbutton.state ) << " ";
-   std::cout << "button " << event.xbutton.button << ".\n";
+bool onButtonPress( XX::Window *window, XEvent& event, void *resources ) {
+   GraphicsPreferences *palette = (GraphicsPreferences *)resources;
+
+   switch( event.xbutton.button ) {
+      case 3:
+         if (palette->popup == nullptr) {
+            palette->popup = new XX::Window( window, 
+                  event.xbutton.x, event.xbutton.y, 270, 30, 
+                  nullptr, 3, palette->color[0], true );
+            palette->popup->setAction( ButtonPress, closePopup, nullptr );
+            palette->popup->setAction( Expose, drawPopup, palette );
+            palette->popup->setAction( MapNotify, drawPopup, palette );
+            palette->popup->setAction( ConfigureNotify, drawPopup, palette );
+         } 
+         if (!palette->popup->isOpen()) {
+            palette->popup->moveTo( event.xbutton.x, event.xbutton.y );
+            palette->popup->open();
+         }
+         break;
+
+      // Button 4 = Scroll up
+      // Button 5 = Scroll down
+      default:
+         std::cout << "Window[" << window->getXID() << "]: ";
+         std::cout << "Pressed " << modState( event.xbutton.state ) << " ";
+         std::cout << "button " << event.xbutton.button << ".\n";
+         break;
+   }
+   return true;
+}
+
+//------------------------------------------------------------------------------
+bool closePopup( XX::Window *window, XEvent& event, void *unused ) {
+   window->close();
    return true;
 }
 
