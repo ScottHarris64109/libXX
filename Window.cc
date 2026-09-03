@@ -64,6 +64,7 @@ XX::Window::Window( XX::Screen *scr ) : Drawable( scr->display() ),
    this->background = this->screen()->getColor( "white" );
    this->borderWidth = 3;
    this->border = this->background;
+   this->title_ = "";
 
    this->xid = RootWindow( this->screen()->display()->xDisplay(), 
          this->screen()->index() );
@@ -76,11 +77,11 @@ XX::Window::Window( XX::Screen *scr ) : Drawable( scr->display() ),
 XX::Window::Window( XX::Screen *scr,
       int originX, int originY, int width, int height, XX::Color *background,
       int borderWidth, XX::Color *border, bool overrideRedirect, 
-      XX::PixMap *icon ) : Drawable( scr->display() ),
+      XX::PixMap *icon, std::string title ) : Drawable( scr->display() ),
             screen_( scr ), 
             originX( originX ), originY( originY ), 
             background( background ),
-            borderWidth( borderWidth ), border( border ) {
+            borderWidth( borderWidth ), border( border ), title_( title ) {
 
    this->parent = this->screen()->rootWindow();
    this->height = height;
@@ -92,10 +93,10 @@ XX::Window::Window( XX::Screen *scr,
 XX::Window::Window( XX::Window *parent, 
       int originX, int originY, int width, int height, XX::Color *background,
       int borderWidth, XX::Color *border, bool overrideRedirect,
-      XX::PixMap *icon ) : Drawable( parent->display() ),
+      XX::PixMap *icon, std::string title ) : Drawable( parent->display() ),
             parent( parent ), originX( originX ), originY( originY ), 
             background( background ),
-            borderWidth( borderWidth ), border( border ) {
+            borderWidth( borderWidth ), border( border ), title_( title ) {
 
    this->screen_ = parent->screen();
    this->height = height;
@@ -144,6 +145,11 @@ void XX::Window::initialize( bool overrideRedirect, XX::PixMap *icon ) {
 
       XSetWMHints( this->screen()->display()->xDisplay(), this->getXID(), 
          &hint );
+   }
+
+   if (!this->title_.empty()) {
+      XStoreName( this->screen()->display()->xDisplay(), this->getXID(),
+            this->title_.c_str() );
    }
 
    this->eventMask = NoEventMask;

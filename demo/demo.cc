@@ -104,7 +104,7 @@ int main( int argc, char *argv[] ) {
    icon->drawLine( palette.color[1], 8, 12, 24, 24 );
 
    window = new XX::Window( display->screen(), 500, 100, 500, 500, 
-         palette.background, -1, nullptr, false, icon );
+         palette.background, -1, nullptr, false, icon, "libXX demo"  );
    window->setAction( ButtonPress, onButtonPress, nullptr );
    window->setAction( ButtonRelease, onButtonRelease, nullptr );
    window->setAction( KeyPress, onKeyPress, nullptr );

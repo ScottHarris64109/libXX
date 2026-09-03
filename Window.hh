@@ -54,6 +54,7 @@ class Window : public XX::Drawable {
 private:
    XX::Screen *screen_;
    Window  *parent;
+   std::string title_;
    std::unordered_map<XID, Window*> children;
    std::unordered_map<int, EventHandler> reaction;
    std::unordered_map<int, void *> resources;
@@ -93,7 +94,7 @@ public:
    Window( XX::Screen *screen, int atX, int atY, int width, int height, 
         XX::Color *background=nullptr, int borderWidth=-1, 
         XX::Color *borderColor=nullptr, bool overrideRedirect=false,
-        XX::PixMap *icon=nullptr );
+        XX::PixMap *icon=nullptr, std::string title="" );
 
    /**
     * Create a Window as a child of an existing Window.  
@@ -109,13 +110,14 @@ public:
    Window( Window *parent, int atX, int atY, int width, int height, 
         XX::Color *background=nullptr, int borderWidth=-1, 
         XX::Color *borderColor=nullptr, bool overrideRedirect=false,
-        XX::PixMap *icon=nullptr );
+        XX::PixMap *icon=nullptr, std::string title="" );
 
    //== Accessors ==============================================================
 
    inline XX::Screen *screen( void ) const { return this->screen_; }
-   inline XX::Color *getBackground( void ) const { return background; }
-   inline bool isOpen( void ) const { return is_open; }
+   inline XX::Color *getBackground( void ) const { return this->background; }
+   inline bool isOpen( void ) const { return this->is_open; }
+   inline std::string title( void ) const { return this->title_; }
 
    //== EventHandlers ==========================================================
 
