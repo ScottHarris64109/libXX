@@ -5,20 +5,24 @@
 #define XX_DISPLAY_HH_
 
 #include <string>
+#include <unordered_map>
 #include <X11/Xlib.h>
 
 namespace XX {
    class Screen;
+   class Window;
 
 /**
- * @brief Display wraps an X11 Display object.  
- * It represents a display card or X11 server driving at least one screen.
+ * @brief Display represents a display card or X11 server driving at least one 
+ * screen.
  * <p>
  * Screens are numbered 0 through screenCount()-1.  If a screen number 
  * parameter is omitted or passed as -1, the default screen -- usually 0 --
  * will be used.
  */
 class Display {
+   // Windows need to add and remove themselves from the Window map.
+   friend class Window;
 
 private:
    std::string name_;
@@ -28,6 +32,11 @@ private:
    void init( void );
 
 protected:
+   /* Locate a Window for event dispatch.  This map can't be a static member of
+    * the Window class because XIDs aren't guaranteed to be unique across 
+    * Display instances.
+    */
+   std::unordered_map<XID, Window*> window;
 
 public:
    //== Constructors ===========================================================
@@ -57,6 +66,7 @@ public:
    XEvent *getNextEvent( XEvent *event, unsigned long eventTypes,
         bool block = true );
    XEvent *peekNextEvent( XEvent *event );
+   bool dispatch( XEvent& event );
    int countPendingEvents( bool flushQueue = true );
 
 }; // class

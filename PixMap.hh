@@ -15,7 +15,10 @@
 namespace XX {
 
 /**
- * @brief PixMap is an object wrapper for an X11 PixMap.
+ * @brief PixMap is a drawing area for a Screen or Window.  
+ * <p>
+ * It is not bound to a location on the Screen or Window and cannot receive
+ * or act on events as a Window can.
  */
 
 class PixMap : public XX::Drawable {

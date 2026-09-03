@@ -43,6 +43,8 @@ XX::Window::~Window( ) {
    if (this->parent) {
       this->parent->children.erase( this->getXID() );
    }
+   // Detach from display.
+   this->screen()->display()->window.erase( this->getXID() );
    XDestroyWindow( this->screen()->display()->xDisplay(), this->getXID() );
 }
 
@@ -65,6 +67,9 @@ XX::Window::Window( XX::Screen *scr ) : Drawable( scr->display() ),
 
    this->xid = RootWindow( this->screen()->display()->xDisplay(), 
          this->screen()->index() );
+
+   this->screen()->display()->window[ this->getXID() ] = this;
+   this->eventMask = NoEventMask;
    this->makeContext();
 }
 
@@ -127,6 +132,7 @@ void XX::Window::initialize( bool overrideRedirect, XX::PixMap *icon ) {
          screen()->colorDepth(),
          InputOutput, CopyFromParent, mask, &attributes );
 
+   this->screen()->display()->window[ this->getXID() ] = this;
    this->parent->children[ this->getXID() ] = this;
 
    if (icon) {
@@ -140,23 +146,149 @@ void XX::Window::initialize( bool overrideRedirect, XX::PixMap *icon ) {
          &hint );
    }
 
+   this->eventMask = NoEventMask;
+   this->closeAtom = XInternAtom( this->screen()->display()->xDisplay(), 
+         "WM_DELETE_WINDOW", True);
+   XSetWMProtocols( this->screen()->display()->xDisplay(), this->getXID(), 
+         &this->closeAtom, 1);
+
    this->makeContext();
 }
 
 //== Accessors ================================================================
 
-/**
- * Get the X11 Atom needed to trap the close event for this window.
- */
-Atom XX::Window::getCloseAtom() {
-   Atom closeAtom=XInternAtom( this->screen()->display()->xDisplay(), 
-         "WM_DELETE_WINDOW", True);
-   XSetWMProtocols( this->screen()->display()->xDisplay(), this->getXID(), 
-         &closeAtom, 1);
-   return closeAtom;
+//== Operations ===============================================================
+
+void XX::Window::setAction( int eventType, EventHandler action )
+{
+   unsigned long mask = maskForEventType( eventType );
+
+   if (mask)
+   {
+      this->eventMask |= mask;
+      XSelectInput( this->screen()->display()->xDisplay(), getXID(), 
+            this->eventMask );
+   }
+
+   this->reaction[ eventType ] = action;
 }
 
-//== Operations ===============================================================
+unsigned long XX::Window::maskForEventType( int eventType ) {
+   unsigned long mask = 0L;
+
+   switch( eventType ) {
+      case ButtonPress:
+         mask = ButtonPressMask;
+         break;
+
+      case ButtonRelease:
+         mask = ButtonReleaseMask;
+         break;
+
+      case CirculateNotify:
+      case ConfigureNotify:
+      case DestroyNotify:
+      case GravityNotify:
+      case MapNotify:
+      case ReparentNotify:
+      case UnmapNotify:
+         mask = StructureNotifyMask | SubstructureNotifyMask;
+         break;
+
+      case CirculateRequest:
+      case ConfigureRequest:
+      case MapRequest:
+         mask = SubstructureRedirectMask;
+         break;
+
+      case ColormapNotify:
+         mask = ColormapChangeMask;
+         break;
+
+      case CreateNotify:
+         mask = SubstructureNotifyMask;
+         break;
+
+      case EnterNotify:
+         mask = EnterWindowMask;
+         break;
+
+      case Expose:
+         mask = ExposureMask;
+         break;
+
+      case FocusIn:
+      case FocusOut:
+         mask = FocusChangeMask;
+         break;
+
+      case KeyPress:
+         mask = KeyPressMask;
+         break;
+
+      case KeyRelease:
+         mask = KeyReleaseMask;
+         break;
+
+      case KeymapNotify:
+         mask = KeymapStateMask;
+         break;
+
+      case LeaveNotify:
+         mask = LeaveWindowMask;
+         break;
+
+      case MotionNotify:
+         mask = ButtonMotionMask | PointerMotionMask;
+         // Button1MotionMask;
+         // Button2MotionMask;
+         // Button3MotionMask;
+         // Button4MotionMask;
+         // Button5MotionMask;
+         break;
+
+      case PropertyNotify:
+         mask = PropertyChangeMask;
+         break;
+
+      case ResizeRequest:
+         mask = ResizeRedirectMask;
+         break;
+
+      case VisibilityNotify:
+         mask = VisibilityChangeMask;
+         break;
+
+      case ClientMessage:
+      case GraphicsExpose:
+      case MappingNotify:
+      case NoExpose:
+      case SelectionClear:
+      case SelectionNotify:
+      case SelectionRequest:
+      default:
+         mask = 0L;
+         break;
+   }
+
+   return mask;
+}
+
+bool XX::Window::actOn( XEvent& event ) {
+   bool handled = false;
+   EventHandler action = nullptr;
+
+   if ((event.type == ClientMessage)
+         && (event.xclient.window == this->getXID())
+         && (event.xclient.data.l[0] == this->closeAtom)) {
+      this->close();
+      handled = true;
+   } else if (action = this->reaction[ event.type ]) { // Assignment intended.
+      handled = action( this, event );
+   }
+
+   return handled;
+}
 
 void XX::Window::open( bool immediately ) {
    XMapWindow( this->screen()->display()->xDisplay(), getXID() );
@@ -172,11 +304,6 @@ void XX::Window::close( bool immediately ) {
    if (immediately) {
       this->screen()->display()->flush();
    }
-}
-
-void XX::Window::listenFor( unsigned long events ) {
-   eventMask = events;
-   XSelectInput( this->screen()->display()->xDisplay(), getXID(), events );
 }
 
 XEvent *XX::Window::getNextEvent( XEvent *event, bool block ) {

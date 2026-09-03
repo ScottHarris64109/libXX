@@ -24,6 +24,7 @@
 
 #include "Display.hh"
 #include "Screen.hh"
+#include "Window.hh"
 #include "Color.hh"
 
 #define BUFFER_SIZE 255
@@ -151,6 +152,18 @@ int XX::Display::countPendingEvents( bool flushQueue ) {
    }
    return XPending( this->xDisplay() );
 }
+
+bool XX::Display::dispatch( XEvent& event ) {
+   XX:Window *recipient = this->window[ event.xany.window ];
+   bool dispatched = false;
+
+   if (recipient) {
+      dispatched = recipient->actOn( event );
+   }
+
+   return dispatched;
+}
+
 //== Accessors ================================================================
 
 /**

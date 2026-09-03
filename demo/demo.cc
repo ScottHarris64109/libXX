@@ -57,13 +57,23 @@ bool finished = false;
 std::multimap<std::string,std::string> parse_args( int argc, char *argv[] );
 std::string getArg( const std::multimap<std::string,std::string> &arg, 
       std::string key, int index=0, std::string defaultValue = "" );
-void scribble( XX::Window *window, XX::Font *font, XX::Color *color1, 
-      XX::Color *color2 );
-void loop( XX::Display *display, XX::Window *window, XX::Font *font, 
-      XX::Color *fg1, XX::Color *fg2 );
+void loop( XX::Display *display, XX::Window *window );
 std::string modState( unsigned int eventState );
 extern "C" void signalHandler( int theSignal );
 
+// XX::EventHandlers
+bool onButtonPress( XX::Window *window, XEvent& event );
+bool onButtonRelease( XX::Window *window, XEvent& event );
+bool onKeyPress( XX::Window *window, XEvent& event );
+bool redraw( XX::Window *window, XEvent& event );
+
+// Resources for redraw.  TODO:  Make them non-global.
+XX::Color *fg1   = nullptr;
+XX::Color *fg2 = nullptr;
+XX::Color *background = nullptr;
+XX::Font *font = nullptr;
+
+//------------------------------------------------------------------------------
 int main( int argc, char *argv[] ) {
    std::multimap<std::string,std::string> arg = parse_args( argc, argv );
    std::string displayName = getArg( arg, "-display" );
@@ -73,10 +83,6 @@ int main( int argc, char *argv[] ) {
    XX::Display *display = nullptr;
    XX::Window *window = nullptr;
    XX::PixMap *icon = nullptr;
-   XX::Color *fg1   = nullptr;
-   XX::Color *fg2 = nullptr;
-   XX::Color *background = nullptr;
-   XX::Font *font = nullptr;
 
    signal( SIGABRT, signalHandler );
    signal( SIGTERM, signalHandler );
@@ -119,9 +125,7 @@ int main( int argc, char *argv[] ) {
 
    window->open( true );
 
-   scribble( window, font, fg1, fg2 );
-
-   loop( display, window, font, fg1, fg2 );
+   loop( display, window );
 
    window->close( true );
 
@@ -132,6 +136,7 @@ int main( int argc, char *argv[] ) {
    exit( EXIT_SUCCESS );
 }
 
+//------------------------------------------------------------------------------
 std::multimap<std::string,std::string> parse_args( int argc, char *argv[] ) {
    std::multimap<std::string,std::string> args;
    std::string key = "";
@@ -160,6 +165,7 @@ std::multimap<std::string,std::string> parse_args( int argc, char *argv[] ) {
    return args;
 }
 
+//------------------------------------------------------------------------------
 std::string getArg( const std::multimap<std::string,std::string> &arg, 
       std::string key, int index, std::string defaultValue ) {
    if (arg.count( key ) <= index) return defaultValue;
@@ -169,370 +175,52 @@ std::string getArg( const std::multimap<std::string,std::string> &arg,
    return it->second;
 }
 
-void loop( XX::Display *display, XX::Window *window, XX::Font *font, 
-      XX::Color *fg1, XX::Color *fg2 ) {
+//------------------------------------------------------------------------------
+void loop( XX::Display *display, XX::Window *window ) {
    XEvent event;
-   Atom windowClosed;
-   char keyBuffer[ BUFFER_SIZE+1 ];
-   XComposeStatus composeStatus;
-   KeySym keySym;
-   int chars = 0;
 
-   window->listenFor( ButtonPressMask | ButtonReleaseMask | 
-         KeyPressMask | KeyReleaseMask |
-         ExposureMask | StructureNotifyMask );
-   windowClosed = window->getCloseAtom();
+   window->setAction( ButtonPress, onButtonPress );
+   window->setAction( ButtonRelease, onButtonRelease );
+   window->setAction( KeyPress, onKeyPress );
+   window->setAction( Expose, redraw );
+   window->setAction( MapNotify, redraw );
+   window->setAction( ConfigureNotify, redraw );
 
-   while (!finished) {
+   while (!finished && window->isOpen()) {
+      // window->getNextEvent( &event ); // Doesn't get ClientMessages.
       display->getNextEvent( &event );
-      // window->getNextEvent( &event ); // Doesn't get the WM ClientMessage.
-      switch( event.type ) {
-
-         case ClientMessage:
-            if (event.xclient.data.l[0] == windowClosed) {
-               std::cout << "Main window closed.\n";
-               finished = true;
-            }
-            break;
-
-         case Expose:
-            std::cout << "Exposed.\n";
-            scribble( window, font, fg1, fg2 );
-            break;
-
-         case MapNotify:
-            std::cout << "Mapped.\n";
-            scribble( window, font, fg1, fg2 );
-            break;
-
-         case ConfigureNotify:
-            std::cout << "Reconfigured.\n";
-            scribble( window, font, fg1, fg2 );
-            break;
-
-         case ButtonPress:
-            std::cout << "Pressed " << modState( event.xbutton.state ) << " ";
-            std::cout << "button " << event.xbutton.button << ".\n";
-            break;
-    // Button 4 = Scroll up
-    // Button 5 = Scroll down
-
-         case ButtonRelease:
-            std::cout << "Released " << modState( event.xbutton.state ) << " ";
-            std::cout << "button " << event.xbutton.button << ".\n";
-            break;
-
-         case KeyPress:
-            chars = XLookupString( &event.xkey, keyBuffer, BUFFER_SIZE, 
-                  &keySym, &composeStatus );
-            std::cout << "Pressed " << modState( event.xkey.state );
-            if ((chars > 0) && (keySym >= ' ') && (keySym <= '~')) {
-               if (event.xkey.state & ControlMask) {
-                  char letter = (char) keySym;
-                  std::cout << "\"^" << letter << "\" #" 
-                       << std::hex << (int) keySym << ".\n";
-               } else {
-                  std::cout << "\"" << keyBuffer[0] << "\".\n";
-               }
-            } else {
-               switch( keySym ) {
-                  case XK_Return:
-                     std::cout << "Return";
-                     break;
-                  case XK_BackSpace:
-                     std::cout << "BackSpace";
-                     break;
-                  case XK_Escape:
-                     std::cout << "Escape";
-                     finished = true;
-                     break;
-                  case XK_Delete:
-                     std::cout << "Delete";
-                     break;
-                  case XK_Up:
-                     std::cout << "Up";
-                     break;
-                  case XK_Down:
-                     std::cout << "Down";
-                     break;
-                  case XK_Right:
-                     std::cout << "Right";
-                     break;
-                  case XK_Left:
-                     std::cout << "Left";
-                     break;
-                  case XK_Home:
-                     std::cout << "Home";
-                     break;
-                  case XK_Prior:
-                     std::cout << "Page Up";
-                     break;
-                  case XK_Next:
-                     std::cout << "Page down";
-                     break;
-                  case XK_Begin:
-                     std::cout << "Begin";
-                     break;
-                  case XK_End:
-                     std::cout << "End";
-                     break;
-                  case XK_Insert:
-                     std::cout << "Insert";
-                     break;
-                  case XK_Help:
-                     std::cout << "Help";
-                     break;
-                  case XK_Menu:
-                     std::cout << "Menu";
-                     break;
-                  case XK_Print:
-                     std::cout << "Print";
-                     break;
-                  case XK_Tab:
-                     std::cout << "Tab";
-                     break;
-                  case XK_Break: // Ctrl-Pause/Break
-                     std::cout << "Break";
-                     break;
-                  case XK_Sys_Req: // Unreachable?
-                     std::cout << "SysReq";
-
-                  case XK_Control_L:
-                     std::cout << "Control L";
-                     break;
-                  case XK_Control_R:
-                     std::cout << "Control R";
-                     break;
-                  case XK_Shift_L:
-                     std::cout << "Shift L";
-                     break;
-                  case XK_Shift_R:
-                     std::cout << "Shift R";
-                     break;
-                  case XK_Alt_L:
-                     std::cout << "Alt L";
-                     break;
-                  case XK_Alt_R:
-                     std::cout << "Alt R";
-                     break;
-                  case XK_Super_L: // Window key
-                     std::cout << "Super L";
-                     break;
-                  case XK_Super_R: // Window key
-                     std::cout << "Super R";
-                     break;
-                  case XK_Hyper_L:
-                     std::cout << "Hyper L";
-                     break;
-                  case XK_Hyper_R:
-                     std::cout << "Hyper R";
-                     break;
-                  case XK_Meta_L:
-                     std::cout << "Meta L";
-                     break;
-                  case XK_Meta_R:
-                     std::cout << "Meta R";
-                     break;
-                  case XK_Caps_Lock:
-                     std::cout << "Caps Lock";
-                     break;
-                  case XK_Num_Lock:
-                     std::cout << "Num Lock";
-                     break;
-                  case XK_Pause:
-                     std::cout << "Pause";
-                     break;
-                  case XK_Scroll_Lock:
-                     std::cout << "Scroll Lock";
-                     break;
-
-                  case XK_F1:
-                     std::cout << "F1";
-                     break;
-                  case XK_F2:
-                     std::cout << "F2";
-                     break;
-                  case XK_F3:
-                     std::cout << "F3";
-                     break;
-                  case XK_F4:
-                     std::cout << "F4";
-                     break;
-                  case XK_F5:
-                     std::cout << "F5";
-                     break;
-                  case XK_F6:
-                     std::cout << "F6";
-                     break;
-                  case XK_F7:
-                     std::cout << "F7";
-                     break;
-                  case XK_F8:
-                     std::cout << "F8";
-                     break;
-                  case XK_F9:
-                     std::cout << "F9";
-                     break;
-                  case XK_F10:
-                     std::cout << "F10";
-                     break;
-                  case XK_F11:
-                     std::cout << "F11";
-                     break;
-                  case XK_F12:
-                     std::cout << "F12";
-                     break;
-                  case XK_F13:
-                     std::cout << "F13";
-                     break;
-                  case XK_F14:
-                     std::cout << "F14";
-                     break;
-                  case XK_F15:
-                     std::cout << "F15";
-                     break;
-
-                  case XK_KP_Enter:
-                     std::cout << "Keypad Enter";
-                     break;
-                  case XK_KP_Delete:
-                     std::cout << "Keypad Delete";
-                     break;
-                  case XK_KP_Up:
-                     std::cout << "Keypad Up";
-                     break;
-                  case XK_KP_Down:
-                     std::cout << "Keypad Down";
-                     break;
-                  case XK_KP_Right:
-                     std::cout << "Keypad Right";
-                     break;
-                  case XK_KP_Left:
-                     std::cout << "Keypad Left";
-                     break;
-                  case XK_KP_Home:
-                     std::cout << "Keypad Home";
-                     break;
-                  case XK_KP_Prior:
-                     std::cout << "Keypad Page Up";
-                     break;
-                  case XK_KP_Next:
-                     std::cout << "Keypad Page down";
-                     break;
-                  case XK_KP_Begin:
-                     std::cout << "Keypad Begin";
-                     break;
-                  case XK_KP_End:
-                     std::cout << "Keypad End";
-                     break;
-                  case XK_KP_Insert:
-                     std::cout << "Keypad Insert";
-                     break;
-                  case XK_KP_Equal:
-                     std::cout << "Keypad Equal";
-                     break;
-                  case XK_KP_Multiply:
-                     std::cout << "Keypad *";
-                     break;
-                  case XK_KP_Divide:
-                     std::cout << "Keypad /";
-                     break;
-                  case XK_KP_Add:
-                     std::cout << "Keypad +";
-                     break;
-                  case XK_KP_Subtract:
-                     std::cout << "Keypad -";
-                     break;
-                  case XK_KP_Decimal:
-                     std::cout << "Keypad .";
-                     break;
-                  case XK_KP_0:
-                     std::cout << "Keypad 0";
-                     break;
-                  case XK_KP_1:
-                     std::cout << "Keypad 1";
-                     break;
-                  case XK_KP_2:
-                     std::cout << "Keypad 2";
-                     break;
-                  case XK_KP_3:
-                     std::cout << "Keypad 3";
-                     break;
-                  case XK_KP_4:
-                     std::cout << "Keypad 4";
-                     break;
-                  case XK_KP_5:
-                     std::cout << "Keypad 5";
-                     break;
-                  case XK_KP_6:
-                     std::cout << "Keypad 6";
-                     break;
-                  case XK_KP_7:
-                     std::cout << "Keypad 7";
-                     break;
-                  case XK_KP_8:
-                     std::cout << "Keypad 8";
-                     break;
-                  case XK_KP_9:
-                     std::cout << "Keypad 9";
-                     break;
-
-                  default:
-                     std::cout << "unrecognized key #" << std::hex 
-                           << (int) keySym;
-                     /* 1008ff19 Mail
-                      * 1008ff2e Home
-                      * 1008ff30 Star
-                      *
-                      * 1008ff31 Pause/Play
-                      * 1008ff16 Rewind
-                      * 1008ff17 Fast Forward
-                      * 1008ff2c Stop
-                      *
-                      * 1008ff11 Volume Down
-                      * 1008ff13 Volume Up
-                      * 1008ff12 Mute
-                      *
-                      * 1008ff32 Music
-                      * 1008ff33 Screen/Terminal
-                      * 1008ff1d Menu
-                      */
-                     break;
-               }
-               std::cout << ".\n";
-            }
-            break;
-
-         /*
-         case KeyRelease:
-            chars = XLookupString( &event.xkey, keyBuffer, BUFFER_SIZE, 
-                  &keySym, &composeStatus );
-            if (chars > 0) {
-               std::cout << "Released \"" << keyBuffer[0] << ".\n";
-            } else {
-               std::cout << "Released a non-ASCII key.\n";
-            }
-            if (keyBuffer[0] == 'q') {
-               finished = true;
-            }
-            break;
-          */
-      }
+      display->dispatch( event );
    }
-
 }
 
-void scribble( XX::Window *window, XX::Font *font, 
-      XX::Color *color1, XX::Color *color2 ) {
-   window->drawLine( color1, 10, 10, 50, 50 );
-   window->drawRectangle( color1, 10, 60, 40, 40 );
-   window->drawArc( color1, 60, 10, 100, 100, 0.0, 360.0 );
-   window->fillArc( color2, 60, 20, 90, 90, 0.0, 90.0 );
-   window->drawText( color1, font, 10, 400, "Hello, World!" );
+//------------------------------------------------------------------------------
+bool redraw( XX::Window *window, XEvent& event ) {
+   switch( event.type ) {
+
+      case Expose:
+         std::cout << "Exposed.\n";
+         break;
+
+      case MapNotify:
+         std::cout << "Mapped.\n";
+         break;
+
+      case ConfigureNotify:
+         std::cout << "Reconfigured.\n";
+         break;
+
+   }
+   window->drawLine( fg1, 10, 10, 50, 50 );
+   window->drawRectangle( fg1, 10, 60, 40, 40 );
+   window->drawArc( fg1, 60, 10, 100, 100, 0.0, 360.0 );
+   window->fillArc( fg2, 60, 20, 90, 90, 0.0, 90.0 );
+   window->drawText( fg1, font, 10, 400, "Hello, World!" );
 
    window->display()->flush();
+   return true;
 }
 
+//------------------------------------------------------------------------------
 std::string modState( unsigned int eventState ) {
    std::string out="[";
    bool started = false;
@@ -613,6 +301,7 @@ std::string modState( unsigned int eventState ) {
    return out;
 }
 
+//------------------------------------------------------------------------------
 extern "C" void signalHandler( int theSignal ) {
    std::string signalName;
 
@@ -631,3 +320,327 @@ extern "C" void signalHandler( int theSignal ) {
    std::cerr << "Caught " << signalName << " signal.\n";
    finished = true;
 }
+
+//------------------------------------------------------------------------------
+bool onButtonPress( XX::Window *window, XEvent& event ) {
+    // Button 4 = Scroll up
+    // Button 5 = Scroll down
+   std::cout << "Window[" << window->getXID() << "] :";
+   std::cout << "Pressed " << modState( event.xbutton.state ) << " ";
+   std::cout << "button " << event.xbutton.button << ".\n";
+   return true;
+}
+
+//------------------------------------------------------------------------------
+bool onButtonRelease( XX::Window *window, XEvent& event ) {
+    // Button 4 = Scroll up
+    // Button 5 = Scroll down
+   std::cout << "Window[" << window->getXID() << "] :";
+   std::cout << "Released " << modState( event.xbutton.state ) << " ";
+   std::cout << "button " << event.xbutton.button << ".\n";
+   return true;
+}
+
+//------------------------------------------------------------------------------
+bool onKeyPress( XX::Window *window, XEvent& event ) {
+   XComposeStatus composeStatus;
+   KeySym         keySym;
+   char           keyBuffer[ BUFFER_SIZE+1 ];
+   int            chars = 0;
+
+   chars = XLookupString( &event.xkey, keyBuffer, BUFFER_SIZE, 
+         &keySym, &composeStatus );
+   std::cout << "Pressed " << modState( event.xkey.state );
+   if ((chars > 0) && (keySym >= ' ') && (keySym <= '~')) {
+      if (event.xkey.state & ControlMask) {
+         char letter = (char) keySym;
+         std::cout << "\"^" << letter << "\" #" 
+               << std::hex << (int) keySym << ".\n";
+      } else {
+         std::cout << "\"" << keyBuffer[0] << "\".\n";
+      }
+   } else {
+      switch( keySym ) {
+         case XK_Return:
+            std::cout << "Return";
+            break;
+         case XK_BackSpace:
+            std::cout << "BackSpace";
+            break;
+         case XK_Escape:
+            std::cout << "Escape";
+            window->close();
+            break;
+         case XK_Delete:
+            std::cout << "Delete";
+            break;
+         case XK_Up:
+            std::cout << "Up";
+            break;
+         case XK_Down:
+            std::cout << "Down";
+            break;
+         case XK_Right:
+            std::cout << "Right";
+            break;
+         case XK_Left:
+            std::cout << "Left";
+            break;
+         case XK_Home:
+            std::cout << "Home";
+            break;
+         case XK_Prior:
+            std::cout << "Page Up";
+            break;
+         case XK_Next:
+            std::cout << "Page down";
+            break;
+         case XK_Begin:
+            std::cout << "Begin";
+            break;
+         case XK_End:
+            std::cout << "End";
+            break;
+         case XK_Insert:
+            std::cout << "Insert";
+            break;
+         case XK_Help:
+            std::cout << "Help";
+            break;
+         case XK_Menu:
+            std::cout << "Menu";
+            break;
+         case XK_Print:
+            std::cout << "Print";
+            break;
+         case XK_Tab:
+            std::cout << "Tab";
+            break;
+         case XK_Break: // Ctrl-Pause/Break
+            std::cout << "Break";
+            break;
+         case XK_Sys_Req: // Unreachable?
+            std::cout << "SysReq";
+            break;
+
+         case XK_Control_L:
+            std::cout << "Control L";
+            break;
+         case XK_Control_R:
+            std::cout << "Control R";
+            break;
+         case XK_Shift_L:
+            std::cout << "Shift L";
+            break;
+         case XK_Shift_R:
+            std::cout << "Shift R";
+            break;
+         case XK_Alt_L:
+            std::cout << "Alt L";
+            break;
+         case XK_Alt_R:
+            std::cout << "Alt R";
+            break;
+         case XK_Super_L: // Window key
+            std::cout << "Super L";
+            break;
+         case XK_Super_R: // Window key
+            std::cout << "Super R";
+            break;
+         case XK_Hyper_L:
+            std::cout << "Hyper L";
+            break;
+         case XK_Hyper_R:
+            std::cout << "Hyper R";
+            break;
+         case XK_Meta_L:
+            std::cout << "Meta L";
+            break;
+         case XK_Meta_R:
+            std::cout << "Meta R";
+            break;
+         case XK_Caps_Lock:
+            std::cout << "Caps Lock";
+            break;
+         case XK_Num_Lock:
+            std::cout << "Num Lock";
+            break;
+         case XK_Pause:
+            std::cout << "Pause";
+            break;
+         case XK_Scroll_Lock:
+            std::cout << "Scroll Lock";
+            break;
+
+         case XK_F1:
+            std::cout << "F1";
+            break;
+         case XK_F2:
+            std::cout << "F2";
+            break;
+         case XK_F3:
+            std::cout << "F3";
+            break;
+         case XK_F4:
+            std::cout << "F4";
+            break;
+         case XK_F5:
+            std::cout << "F5";
+            break;
+         case XK_F6:
+            std::cout << "F6";
+            break;
+         case XK_F7:
+            std::cout << "F7";
+            break;
+         case XK_F8:
+            std::cout << "F8";
+            break;
+         case XK_F9:
+            std::cout << "F9";
+            break;
+         case XK_F10:
+            std::cout << "F10";
+            break;
+         case XK_F11:
+            std::cout << "F11";
+            break;
+         case XK_F12:
+            std::cout << "F12";
+            break;
+         case XK_F13:
+            std::cout << "F13";
+            break;
+         case XK_F14:
+            std::cout << "F14";
+            break;
+         case XK_F15:
+            std::cout << "F15";
+            break;
+
+         case XK_KP_Enter:
+            std::cout << "Keypad Enter";
+            break;
+         case XK_KP_Delete:
+            std::cout << "Keypad Delete";
+            break;
+         case XK_KP_Up:
+            std::cout << "Keypad Up";
+            break;
+         case XK_KP_Down:
+            std::cout << "Keypad Down";
+            break;
+         case XK_KP_Right:
+            std::cout << "Keypad Right";
+            break;
+         case XK_KP_Left:
+            std::cout << "Keypad Left";
+            break;
+         case XK_KP_Home:
+            std::cout << "Keypad Home";
+            break;
+         case XK_KP_Prior:
+            std::cout << "Keypad Page Up";
+            break;
+         case XK_KP_Next:
+            std::cout << "Keypad Page down";
+            break;
+         case XK_KP_Begin:
+            std::cout << "Keypad Begin";
+            break;
+         case XK_KP_End:
+            std::cout << "Keypad End";
+            break;
+         case XK_KP_Insert:
+            std::cout << "Keypad Insert";
+            break;
+         case XK_KP_Equal:
+            std::cout << "Keypad Equal";
+            break;
+         case XK_KP_Multiply:
+            std::cout << "Keypad *";
+            break;
+         case XK_KP_Divide:
+            std::cout << "Keypad /";
+            break;
+         case XK_KP_Add:
+            std::cout << "Keypad +";
+            break;
+         case XK_KP_Subtract:
+            std::cout << "Keypad -";
+            break;
+         case XK_KP_Decimal:
+            std::cout << "Keypad .";
+            break;
+         case XK_KP_0:
+            std::cout << "Keypad 0";
+            break;
+         case XK_KP_1:
+            std::cout << "Keypad 1";
+            break;
+         case XK_KP_2:
+            std::cout << "Keypad 2";
+            break;
+         case XK_KP_3:
+            std::cout << "Keypad 3";
+            break;
+         case XK_KP_4:
+            std::cout << "Keypad 4";
+            break;
+         case XK_KP_5:
+            std::cout << "Keypad 5";
+            break;
+         case XK_KP_6:
+            std::cout << "Keypad 6";
+            break;
+         case XK_KP_7:
+            std::cout << "Keypad 7";
+            break;
+         case XK_KP_8:
+            std::cout << "Keypad 8";
+            break;
+         case XK_KP_9:
+            std::cout << "Keypad 9";
+            break;
+
+         default:
+            std::cout << "unrecognized key #" << std::hex << (int) keySym;
+            /* 1008ff19 Mail
+             * 1008ff2e Home
+             * 1008ff30 Star
+             *
+             * 1008ff31 Pause/Play
+             * 1008ff16 Rewind
+             * 1008ff17 Fast Forward
+             * 1008ff2c Stop
+             *
+             * 1008ff11 Volume Down
+             * 1008ff13 Volume Up
+             * 1008ff12 Mute
+             *
+             * 1008ff32 Music
+             * 1008ff33 Screen/Terminal
+             * 1008ff1d Menu
+             */
+            break;
+      }
+      std::cout << ".\n";
+   }
+
+   return true;
+}
+
+         /*
+         case KeyRelease:
+            chars = XLookupString( &event.xkey, keyBuffer, BUFFER_SIZE, 
+                  &keySym, &composeStatus );
+            if (chars > 0) {
+               std::cout << "Released \"" << keyBuffer[0] << ".\n";
+            } else {
+               std::cout << "Released a non-ASCII key.\n";
+            }
+            if (keyBuffer[0] == 'q') {
+               finished = true;
+            }
+            break;
+          */
