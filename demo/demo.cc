@@ -38,21 +38,13 @@
 #define BUFFER_SIZE 255
 
 typedef struct {
-   char *displayName;
-   char *title;
-   char *foregroundColorName;
-   char *backgroundColorName;
-   char *borderColorName;
-   char *fontName;
-   int borderWidth;
-   int x;
-   int y;
-   int height;
-   int width;
-   bool iconic;
-} WindowPreferences;
+   XX::Color *color[2];
+   XX::Color *background = nullptr;
+   XX::Font  *font = nullptr;
+} GraphicsPreferences;
 
-bool finished = false;
+// Used by error handlers to break the main loop.
+bool aborted = false;
 
 std::multimap<std::string,std::string> parse_args( int argc, char *argv[] );
 std::string getArg( const std::multimap<std::string,std::string> &arg, 
@@ -62,16 +54,10 @@ std::string modState( unsigned int eventState );
 extern "C" void signalHandler( int theSignal );
 
 // XX::EventHandlers
-bool onButtonPress( XX::Window *window, XEvent& event );
-bool onButtonRelease( XX::Window *window, XEvent& event );
-bool onKeyPress( XX::Window *window, XEvent& event );
-bool redraw( XX::Window *window, XEvent& event );
-
-// Resources for redraw.  TODO:  Make them non-global.
-XX::Color *fg1   = nullptr;
-XX::Color *fg2 = nullptr;
-XX::Color *background = nullptr;
-XX::Font *font = nullptr;
+bool onButtonPress( XX::Window *window, XEvent& event, void *unused );
+bool onButtonRelease( XX::Window *window, XEvent& event, void *unused );
+bool onKeyPress( XX::Window *window, XEvent& event, void *unused );
+bool redraw( XX::Window *window, XEvent& event, void *resources );
 
 //------------------------------------------------------------------------------
 int main( int argc, char *argv[] ) {
@@ -83,6 +69,7 @@ int main( int argc, char *argv[] ) {
    XX::Display *display = nullptr;
    XX::Window *window = nullptr;
    XX::PixMap *icon = nullptr;
+   GraphicsPreferences palette;
 
    signal( SIGABRT, signalHandler );
    signal( SIGTERM, signalHandler );
@@ -104,24 +91,26 @@ int main( int argc, char *argv[] ) {
          << " x " << display->screen( s )->colorDepth() << "\n";
    }
 
-   std::cout << "Getting colors.\n";
-   background = display->screen()->getColor( bgname );
-   fg1 = display->screen()->getColor( fg1name );
-   fg2 = display->screen()->getColor( fg2name );
-   std::cout << "Got colors.\n";
+   palette.font = new XX::Font( display, "variable" );
+   palette.background = display->screen()->getColor( bgname );
+   palette.color[0]   = display->screen()->getColor( fg1name );
+   palette.color[1]   = display->screen()->getColor( fg2name );
 
    icon = new XX::PixMap( display->screen(), 24, 24 );
-   icon->fillRectangle( background, 0,0, 24,24 );
-   icon->drawLine( fg1, 0, 0, 16, 12 );
-   icon->drawLine( fg1, 16, 12, 0, 24 );
-   icon->drawLine( fg2, 24, 0, 8, 12 );
-   icon->drawLine( fg2, 8, 12, 24, 24 );
+   icon->fillRectangle( palette.background, 0,0, 24,24 );
+   icon->drawLine( palette.color[0], 0, 0, 16, 12 );
+   icon->drawLine( palette.color[0], 16, 12, 0, 24 );
+   icon->drawLine( palette.color[1], 24, 0, 8, 12 );
+   icon->drawLine( palette.color[1], 8, 12, 24, 24 );
 
-   window = new XX::Window( display->screen(), 500, 100, 500, 500, background, 
-       -1, nullptr, false, icon );
-   std::cout << "Got window.\n";
-
-   font = new XX::Font( display, "variable" );
+   window = new XX::Window( display->screen(), 500, 100, 500, 500, 
+         palette.background, -1, nullptr, false, icon );
+   window->setAction( ButtonPress, onButtonPress, nullptr );
+   window->setAction( ButtonRelease, onButtonRelease, nullptr );
+   window->setAction( KeyPress, onKeyPress, nullptr );
+   window->setAction( Expose, redraw, &palette );
+   window->setAction( MapNotify, redraw, &palette );
+   window->setAction( ConfigureNotify, redraw, &palette );
 
    window->open( true );
 
@@ -129,7 +118,7 @@ int main( int argc, char *argv[] ) {
 
    window->close( true );
 
-   delete font;
+   delete palette.font;
    delete icon;
    delete window;
    delete display;
@@ -179,22 +168,15 @@ std::string getArg( const std::multimap<std::string,std::string> &arg,
 void loop( XX::Display *display, XX::Window *window ) {
    XEvent event;
 
-   window->setAction( ButtonPress, onButtonPress );
-   window->setAction( ButtonRelease, onButtonRelease );
-   window->setAction( KeyPress, onKeyPress );
-   window->setAction( Expose, redraw );
-   window->setAction( MapNotify, redraw );
-   window->setAction( ConfigureNotify, redraw );
-
-   while (!finished && window->isOpen()) {
-      // window->getNextEvent( &event ); // Doesn't get ClientMessages.
+   while (!aborted && window->isOpen()) {
       display->getNextEvent( &event );
       display->dispatch( event );
    }
 }
 
 //------------------------------------------------------------------------------
-bool redraw( XX::Window *window, XEvent& event ) {
+bool redraw( XX::Window *window, XEvent& event, void *resources ) {
+   GraphicsPreferences *palette = (GraphicsPreferences *)resources;
    switch( event.type ) {
 
       case Expose:
@@ -210,11 +192,11 @@ bool redraw( XX::Window *window, XEvent& event ) {
          break;
 
    }
-   window->drawLine( fg1, 10, 10, 50, 50 );
-   window->drawRectangle( fg1, 10, 60, 40, 40 );
-   window->drawArc( fg1, 60, 10, 100, 100, 0.0, 360.0 );
-   window->fillArc( fg2, 60, 20, 90, 90, 0.0, 90.0 );
-   window->drawText( fg1, font, 10, 400, "Hello, World!" );
+   window->drawLine( palette->color[0], 10, 10, 50, 50 );
+   window->drawRectangle( palette->color[0], 10, 60, 40, 40 );
+   window->drawArc( palette->color[0], 60, 10, 100, 100, 0.0, 360.0 );
+   window->fillArc( palette->color[1], 60, 20, 90, 90, 0.0, 90.0 );
+   window->drawText( palette->color[0], palette->font, 10, 400, "Hello, World!" );
 
    window->display()->flush();
    return true;
@@ -281,12 +263,12 @@ std::string modState( unsigned int eventState ) {
       out += "#3";
       started = true;
    }
-   if (eventState & Button4Mask) { //Up
+   if (eventState & Button4Mask) { // Scroll Wheel Up
       if (started) out += "+";
       out += "#4";
       started = true;
    }
-   if (eventState & Button5Mask) { //Down
+   if (eventState & Button5Mask) { // Scroll Wheel Down
       if (started) out += "+";
       out += "#5";
       started = true;
@@ -318,31 +300,31 @@ extern "C" void signalHandler( int theSignal ) {
    }
 
    std::cerr << "Caught " << signalName << " signal.\n";
-   finished = true;
+   aborted = true;
 }
 
 //------------------------------------------------------------------------------
-bool onButtonPress( XX::Window *window, XEvent& event ) {
+bool onButtonPress( XX::Window *window, XEvent& event, void *unused ) {
     // Button 4 = Scroll up
     // Button 5 = Scroll down
-   std::cout << "Window[" << window->getXID() << "] :";
+   std::cout << "Window[" << window->getXID() << "]: ";
    std::cout << "Pressed " << modState( event.xbutton.state ) << " ";
    std::cout << "button " << event.xbutton.button << ".\n";
    return true;
 }
 
 //------------------------------------------------------------------------------
-bool onButtonRelease( XX::Window *window, XEvent& event ) {
+bool onButtonRelease( XX::Window *window, XEvent& event, void *unused ) {
     // Button 4 = Scroll up
     // Button 5 = Scroll down
-   std::cout << "Window[" << window->getXID() << "] :";
+   std::cout << "Window[" << window->getXID() << "]: ";
    std::cout << "Released " << modState( event.xbutton.state ) << " ";
    std::cout << "button " << event.xbutton.button << ".\n";
    return true;
 }
 
 //------------------------------------------------------------------------------
-bool onKeyPress( XX::Window *window, XEvent& event ) {
+bool onKeyPress( XX::Window *window, XEvent& event, void *unused ) {
    XComposeStatus composeStatus;
    KeySym         keySym;
    char           keyBuffer[ BUFFER_SIZE+1 ];
@@ -605,23 +587,6 @@ bool onKeyPress( XX::Window *window, XEvent& event ) {
 
          default:
             std::cout << "unrecognized key #" << std::hex << (int) keySym;
-            /* 1008ff19 Mail
-             * 1008ff2e Home
-             * 1008ff30 Star
-             *
-             * 1008ff31 Pause/Play
-             * 1008ff16 Rewind
-             * 1008ff17 Fast Forward
-             * 1008ff2c Stop
-             *
-             * 1008ff11 Volume Down
-             * 1008ff13 Volume Up
-             * 1008ff12 Mute
-             *
-             * 1008ff32 Music
-             * 1008ff33 Screen/Terminal
-             * 1008ff1d Menu
-             */
             break;
       }
       std::cout << ".\n";
@@ -629,18 +594,3 @@ bool onKeyPress( XX::Window *window, XEvent& event ) {
 
    return true;
 }
-
-         /*
-         case KeyRelease:
-            chars = XLookupString( &event.xkey, keyBuffer, BUFFER_SIZE, 
-                  &keySym, &composeStatus );
-            if (chars > 0) {
-               std::cout << "Released \"" << keyBuffer[0] << ".\n";
-            } else {
-               std::cout << "Released a non-ASCII key.\n";
-            }
-            if (keyBuffer[0] == 'q') {
-               finished = true;
-            }
-            break;
-          */

@@ -17,7 +17,7 @@ namespace XX {
    class PixMap;
    class Window;
 
-   typedef bool (*EventHandler)( Window *, XEvent& );
+   typedef bool (*EventHandler)( Window *, XEvent&, void * );
 
 /**
  * @brief Window is a GUI window.
@@ -32,12 +32,17 @@ namespace XX {
  * worrying about resource leakage.  Use-after-free errors are still possible, 
  * however.
  * <p>
- * <b><code> typedef bool (*EventHandler)( Window *, XEvent& ); </code></b>
+ * <b><code>typedef bool (*EventHandler)( Window *, XEvent&, void * );</code></b>
  * <p>
  * An EventHandler is a callback function for processing XEvents that happen 
  * to the Window.  It returns <code>true</code> if it processes the event and 
  * <code>false</code> if it rejects or ignores it.  An unprocessed event may 
  * be handed off to another resource.
+ * <p>
+ * Parameters to an EventHandler are the Window that executes it, the XEvent 
+ * that triggered it, and a pointer to a resource bundle it can access 
+ * during execution.  The resource pointer is non-owning; whatever it points
+ * to (if anything) must be managed by the application.
  * <p>
  * EventHandlers are assigned using <code>setAction()</code>.
  */
@@ -51,6 +56,7 @@ private:
    Window  *parent;
    std::unordered_map<XID, Window*> children;
    std::unordered_map<int, EventHandler> reaction;
+   std::unordered_map<int, void *> resources;
    XX::Color   *background;
    XX::Color   *border;
    Atom       closeAtom;
@@ -111,15 +117,20 @@ public:
    inline XX::Color *getBackground( void ) const { return background; }
    inline bool isOpen( void ) const { return is_open; }
 
-   //== Operations =============================================================
-
-   void open( bool immediately=false );
-   void close( bool immediately=false );
+   //== EventHandlers ==========================================================
 
    /**
     *  Assign an event handler for an event type.
     */
-   void setAction( int eventType, EventHandler action );
+   void setAction( int eventType, EventHandler action, void *resource=nullptr );
+
+   /**
+    * Ignopre events of this type.  If an EventHandler and resource bundle have 
+    * been assigned to this event type, references to them will be dropped.
+    * <p>
+    * Some event types such as ClientMessage cannot be ignored.
+    */
+   void ignore( int eventType );
 
    /**
     * Execute the event handler on the event.  Return <code>true</code> 
@@ -127,9 +138,11 @@ public:
     */
    bool actOn( XEvent& event );
 
-   XEvent *getNextEvent( XEvent *event, bool block=true );
-   XEvent *getNextEvent( XEvent *event, unsigned long eventTypes, 
-         bool block=true );
+   //== Operations =============================================================
+
+   void open( bool immediately=false );
+   void close( bool immediately=false );
+
 }; // class
 }; // namespace
 

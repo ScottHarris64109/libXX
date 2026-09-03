@@ -155,11 +155,9 @@ void XX::Window::initialize( bool overrideRedirect, XX::PixMap *icon ) {
    this->makeContext();
 }
 
-//== Accessors ================================================================
+//== EventHandlers ============================================================
 
-//== Operations ===============================================================
-
-void XX::Window::setAction( int eventType, EventHandler action )
+void XX::Window::setAction( int eventType, EventHandler action, void *resource )
 {
    unsigned long mask = maskForEventType( eventType );
 
@@ -171,6 +169,7 @@ void XX::Window::setAction( int eventType, EventHandler action )
    }
 
    this->reaction[ eventType ] = action;
+   this->resources[ eventType ] = resource;
 }
 
 unsigned long XX::Window::maskForEventType( int eventType ) {
@@ -274,6 +273,11 @@ unsigned long XX::Window::maskForEventType( int eventType ) {
    return mask;
 }
 
+void XX::Window::ignore( int eventType ) {
+   this->reaction.erase( eventType );
+   this->resources.erase( eventType );
+}
+
 bool XX::Window::actOn( XEvent& event ) {
    bool handled = false;
    EventHandler action = nullptr;
@@ -284,11 +288,13 @@ bool XX::Window::actOn( XEvent& event ) {
       this->close();
       handled = true;
    } else if (action = this->reaction[ event.type ]) { // Assignment intended.
-      handled = action( this, event );
+      handled = action( this, event, this->resources[ event.type ] );
    }
 
    return handled;
 }
+
+//== Operations ===============================================================
 
 void XX::Window::open( bool immediately ) {
    XMapWindow( this->screen()->display()->xDisplay(), getXID() );
@@ -304,27 +310,4 @@ void XX::Window::close( bool immediately ) {
    if (immediately) {
       this->screen()->display()->flush();
    }
-}
-
-XEvent *XX::Window::getNextEvent( XEvent *event, bool block ) {
-   if (block) {
-      XWindowEvent( this->screen()->display()->xDisplay(), getXID(), 
-            eventMask, event );
-   } else if (!XCheckWindowEvent( this->screen()->display()->xDisplay(), 
-            getXID(), eventMask, event )) {
-      return nullptr;
-   }
-   return event;
-}
-
-XEvent *XX::Window::getNextEvent( XEvent *event, unsigned long eventTypes, 
-      bool block ) {
-   if (block) {
-      XWindowEvent( this->screen()->display()->xDisplay(), getXID(), 
-            eventTypes, event );
-   } else if (!XCheckWindowEvent( this->screen()->display()->xDisplay(), 
-            getXID(), eventTypes, event )) {
-      return nullptr;
-   }
-   return event;
 }
