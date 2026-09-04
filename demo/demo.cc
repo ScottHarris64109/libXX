@@ -50,7 +50,6 @@ bool aborted = false;
 std::multimap<std::string,std::string> parse_args( int argc, char *argv[] );
 std::string getArg( const std::multimap<std::string,std::string> &arg, 
       std::string key, int index=0, std::string defaultValue = "" );
-void loop( XX::Display *display, XX::Window *window );
 std::string modState( unsigned int eventState );
 extern "C" void signalHandler( int theSignal );
 
@@ -70,11 +69,6 @@ int main( int argc, char *argv[] ) {
    std::string fg1name = getArg( arg, "-foreground", 0, "black" );
    std::string fg2name = getArg( arg, "-foreground", 1, "red" );
    std::string bgname  = getArg( arg, "-background", 0, "white" );
-   XX::Display *display = nullptr;
-   XX::Window *window = nullptr;
-   XX::Window *popup = nullptr;
-   XX::PixMap *icon = nullptr;
-   GraphicsPreferences palette;
 
    signal( SIGABRT, signalHandler );
    signal( SIGTERM, signalHandler );
@@ -85,48 +79,59 @@ int main( int argc, char *argv[] ) {
       "This is free software, and you are welcome to redistribute it \n"
       "under certain conditions.  (See the GNU GPL version 3 for details).\n\n";
 
-   display = new XX::Display( displayName );
+   XX::Display display( displayName );
    std::cout << "Got display.\n";
-   std::cout << display->vendorName() << " | " << display->name() <<"\n";
-   std::cout << display->screenCount() << " screens.\n";
-   for (int s=0; s < display->screenCount(); s++)
+   std::cout << display.vendorName() << " | " << display.name() <<"\n";
+   if (display.screenCount() > 1) {
+      std::cout << display.screenCount() << " screens.\n";
+   } else {
+      std::cout << display.screenCount() << " screen.\n";
+   }
+   for (int s=0; s < display.screenCount(); s++)
    {
-      std::cout << "  " << s << ". " << display->screen( s )->width() 
-         << " x " << display->screen( s )->height() 
-         << " x " << display->screen( s )->colorDepth() << "\n";
+      std::cout << "  " << s << ". " << display.screen( s )->width() 
+         << " x " << display.screen( s )->height() 
+         << " x " << display.screen( s )->colorDepth() << "\n";
    }
 
-   palette.font = new XX::Font( display, "variable" );
-   palette.background = display->screen()->getColor( bgname );
-   palette.color[0]   = display->screen()->getColor( fg1name );
-   palette.color[1]   = display->screen()->getColor( fg2name );
+   GraphicsPreferences palette;
+   palette.font = new XX::Font( &display, "variable" );
+   palette.background = display.screen()->getColor( bgname );
+   palette.color[0]   = display.screen()->getColor( fg1name );
+   palette.color[1]   = display.screen()->getColor( fg2name );
 
-   icon = new XX::PixMap( display->screen(), 24, 24 );
+   XX::PixMap *icon = new XX::PixMap( display.screen(), 24, 24 );
    icon->fillRectangle( palette.background, 0,0, 24,24 );
    icon->drawLine( palette.color[0], 0, 0, 16, 12 );
    icon->drawLine( palette.color[0], 16, 12, 0, 24 );
    icon->drawLine( palette.color[1], 24, 0, 8, 12 );
    icon->drawLine( palette.color[1], 8, 12, 24, 24 );
 
-   window = new XX::Window( display->screen(), 500, 100, 500, 500, 
+   XX::Window *mainWindow = new XX::Window( display.screen(), 
+         500, 100, 500, 500, 
          palette.background, -1, nullptr, false, icon, "libXX demo"  );
-   window->setAction( ButtonPress, onButtonPress, &palette );
-   window->setAction( ButtonRelease, onButtonRelease, nullptr );
-   window->setAction( KeyPress, onKeyPress, nullptr );
-   window->setAction( Expose, redraw, &palette );
-   window->setAction( MapNotify, redraw, &palette );
-   window->setAction( ConfigureNotify, redraw, &palette );
+   mainWindow->setAction( ButtonPress, onButtonPress, &palette );
+   mainWindow->setAction( ButtonRelease, onButtonRelease, nullptr );
+   mainWindow->setAction( KeyPress, onKeyPress, nullptr );
+   mainWindow->setAction( Expose, redraw, &palette );
+   mainWindow->setAction( MapNotify, redraw, &palette );
+   mainWindow->setAction( ConfigureNotify, redraw, &palette );
 
-   window->open( true );
+   mainWindow->open( true );
 
-   loop( display, window );
+   XEvent event;
+   while (!aborted && mainWindow->isOpen()) {
+      event = display.getNextEvent( );
+      display.dispatch( event );
+   }
 
-   window->close( true );
+   mainWindow->close( true );
 
    delete palette.font;
+   delete palette.color[0];
+   delete palette.color[1];
+   delete palette.background;
    delete icon;
-   delete window;
-   delete display;
    exit( EXIT_SUCCESS );
 }
 
@@ -167,16 +172,6 @@ std::string getArg( const std::multimap<std::string,std::string> &arg,
    auto it = arg.find(key);
    for (int step = 0; step < index; step++) it++;
    return it->second;
-}
-
-//------------------------------------------------------------------------------
-void loop( XX::Display *display, XX::Window *window ) {
-   XEvent event;
-
-   while (!aborted && window->isOpen()) {
-      display->getNextEvent( &event );
-      display->dispatch( event );
-   }
 }
 
 //------------------------------------------------------------------------------

@@ -113,35 +113,39 @@ void XX::Display::flush( void ) {
 
 /**
  *  Get the next pending event, but do not remove it from the queue.
+ *  If countPendingEvents() is zero, this method will block until an event is 
+ *  queued.
  */
-XEvent *XX::Display::peekNextEvent( XEvent *event ) {
-   XPeekEvent( this->xDisplay(), event );
+XEvent XX::Display::peekNextEvent( ) {
+   XEvent event;
+   XPeekEvent( this->xDisplay(), &event );
    return event;
 }
 
 /**
  *  Get the next pending event.
+ *  If countPendingEvents() is zero, this method will block until an event is 
+ *  queued.
  */
-XEvent *XX::Display::getNextEvent( XEvent *event, bool block ) {
-   if (!block && !countPendingEvents()) {
-      return NULL;
-   }
-   XNextEvent( this->xDisplay(), event );
+XEvent XX::Display::getNextEvent( ) {
+   XEvent event;
+   XNextEvent( this->xDisplay(), &event );
    return event;
 }
 
 /**
  *  Get the next event whose type is found in the mask.
- */
-XEvent *XX::Display::getNextEvent( XEvent *event, unsigned long eventTypes, 
-      bool block ) {
-   if (block) {
-      XMaskEvent( this->xDisplay(), eventTypes, event );
-   } else if (!XCheckMaskEvent( this->xDisplay(), eventTypes, event )) {
+XEvent *XX::Display::getNextEvent( unsigned long eventTypes, bool blocking ) {
+   XEvent event;
+
+   if (blocking) {
+      XMaskEvent( this->xDisplay(), eventTypes, &event );
+   } else if (!XCheckMaskEvent( this->xDisplay(), eventTypes, &event )) {
       return NULL;
    }
    return event;
 }
+ */
 
 /**
  *  Get the number of pending events.

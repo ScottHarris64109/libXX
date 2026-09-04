@@ -62,10 +62,12 @@ public:
    //== Operations =============================================================
 
    void flush( void );
-   XEvent *getNextEvent( XEvent *event, bool block = true );
+   XEvent peekNextEvent( void );
+   XEvent getNextEvent( void );
+   /*
    XEvent *getNextEvent( XEvent *event, unsigned long eventTypes,
         bool block = true );
-   XEvent *peekNextEvent( XEvent *event );
+    */
    bool dispatch( XEvent& event );
    int countPendingEvents( bool flushQueue = true );
 
