@@ -17,7 +17,7 @@ namespace XX {
    class PixMap;
    class Window;
 
-   typedef bool (*EventHandler)( Window *, XEvent&, void * );
+   // typedef bool (*EventHandler)( Window *, XEvent&, void * );
 
 /**
  * @brief Window is a GUI window.
@@ -31,33 +31,37 @@ namespace XX {
  * destroy Windows as needed and can let Window pointers go out of scope without
  * worrying about resource leakage.  Use-after-free errors are still possible, 
  * however.
- * <p>
- * <b><code>typedef bool (*EventHandler)( Window *, XEvent&, void * );</code></b>
- * <p>
- * An EventHandler is a callback function for processing XEvents that happen 
- * to the Window.  It returns <code>true</code> if it processes the event and 
- * <code>false</code> if it rejects or ignores it.  An unprocessed event may 
- * be handed off to another resource.
- * <p>
- * Parameters to an EventHandler are the Window that executes it, the XEvent 
- * that triggered it, and a pointer to a resource bundle it can access 
- * during execution.  The resource pointer is non-owning; whatever it points
- * to (if anything) must be managed by the application.
- * <p>
- * EventHandlers are assigned using <code>setAction()</code>.
  */
 
 class Window : public XX::Drawable {
    // Screen needs the root Window constructor.
    friend class Screen;
 
+public:
+   /**
+    * @brief EventHandler is a functor for processing XEvents that happen 
+    * to a Window.  
+    * <p>
+    * It returns <code>true</code> if it processes the event and 
+    * <code>false</code> if it rejects or ignores it.  An unprocessed event may 
+    * be handed off to another resource.
+    * <p>
+    * Parameters to an EventHandler are the Window that executes it and the 
+    * XEvent that triggered it.
+    * <p>
+    * EventHandlers are assigned using <code>setAction()</code>.
+    */
+   class EventHandler {
+   public:
+      virtual bool operator()( Window *, XEvent& ) { return false; };
+   };
+
 private:
    XX::Screen *screen_;
    Window  *parent;
    std::string title_;
    std::unordered_map<XID, Window*> children;
-   std::unordered_map<int, EventHandler> reaction;
-   std::unordered_map<int, void *> resources;
+   std::unordered_map<int, EventHandler*> reaction;
    XX::Color   *background;
    XX::Color   *border;
    Atom       closeAtom;
@@ -124,7 +128,7 @@ public:
    /**
     *  Assign an event handler for an event type.
     */
-   void setAction( int eventType, EventHandler action, void *resource=nullptr );
+   void setAction( int eventType, EventHandler *action );
 
    /**
     * Ignopre events of this type.  If an EventHandler and resource bundle have 

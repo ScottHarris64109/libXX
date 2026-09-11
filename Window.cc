@@ -163,7 +163,7 @@ void XX::Window::initialize( bool overrideRedirect, XX::PixMap *icon ) {
 
 //== EventHandlers ============================================================
 
-void XX::Window::setAction( int eventType, EventHandler action, void *resource )
+void XX::Window::setAction( int eventType, XX::Window::EventHandler *action )
 {
    unsigned long mask = maskForEventType( eventType );
 
@@ -175,7 +175,6 @@ void XX::Window::setAction( int eventType, EventHandler action, void *resource )
    }
 
    this->reaction[ eventType ] = action;
-   this->resources[ eventType ] = resource;
 }
 
 unsigned long XX::Window::maskForEventType( int eventType ) {
@@ -281,12 +280,11 @@ unsigned long XX::Window::maskForEventType( int eventType ) {
 
 void XX::Window::ignore( int eventType ) {
    this->reaction.erase( eventType );
-   this->resources.erase( eventType );
 }
 
 bool XX::Window::actOn( XEvent& event ) {
    bool handled = false;
-   EventHandler action = nullptr;
+   XX::Window::EventHandler *action;
 
    if ((event.type == ClientMessage)
          && (event.xclient.window == this->getXID())
@@ -294,7 +292,7 @@ bool XX::Window::actOn( XEvent& event ) {
       this->close();
       handled = true;
    } else if (action = this->reaction[ event.type ]) { // Assignment intended.
-      handled = action( this, event, this->resources[ event.type ] );
+      handled = (*action)( this, event );
    }
 
    return handled;
