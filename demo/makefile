@@ -11,7 +11,7 @@ SOURCES= demo.cc
 LIBS=  -lXX -lX11
 
 $(TARGET): $(SOURCES)
-	g++ $(CFLAGS) -o $(TARGET) $(SOURCES) $(LDFLAGS) $(LIBS)
+	$(CXX) $(CFLAGS) -o $(TARGET) $(SOURCES) $(LDFLAGS) $(LIBS)
 
 all:  $(TARGET)
 

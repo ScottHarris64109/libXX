@@ -38,6 +38,7 @@
 #define BUFFER_SIZE 255
 
 typedef struct {
+   bool isDrawing = false;
    XX::Color  *color[2] = { nullptr, nullptr };
    XX::Color  *background = nullptr;
    XX::Font   *font = nullptr;
@@ -54,13 +55,13 @@ std::string modState( unsigned int eventState );
 extern "C" void signalHandler( int theSignal );
 
 // XX::EventHandlers
-bool onButtonPress( XX::Window *window, XEvent& event, void *resources );
-bool onButtonRelease( XX::Window *window, XEvent& event, void *unused );
-bool onKeyPress( XX::Window *window, XEvent& event, void *unused );
-bool redraw( XX::Window *window, XEvent& event, void *resources );
+bool mainWindow_buttonPress( XX::Window *window, XEvent& event, void *resources );
+bool mainWindow_buttonRelease( XX::Window *window, XEvent& event, void *unused );
+bool mainWindow_keyPress( XX::Window *window, XEvent& event, void *unused );
+bool mainWindow_draw( XX::Window *window, XEvent& event, void *resources );
 
-bool closePopup( XX::Window *window, XEvent& event, void *unused );
-bool drawPopup( XX::Window *window, XEvent& event, void *resources );
+bool popup_draw( XX::Window *window, XEvent& event, void *resources );
+bool popup_close( XX::Window *window, XEvent& event, void *unused );
 
 //------------------------------------------------------------------------------
 int main( int argc, char *argv[] ) {
@@ -110,13 +111,14 @@ int main( int argc, char *argv[] ) {
    XX::Window *mainWindow = new XX::Window( display.screen(), 
          500, 100, 500, 500, 
          palette.background, -1, nullptr, false, icon, "libXX demo"  );
-   mainWindow->setAction( ButtonPress, onButtonPress, &palette );
-   mainWindow->setAction( ButtonRelease, onButtonRelease, nullptr );
-   mainWindow->setAction( KeyPress, onKeyPress, nullptr );
-   mainWindow->setAction( Expose, redraw, &palette );
-   mainWindow->setAction( MapNotify, redraw, &palette );
-   mainWindow->setAction( ConfigureNotify, redraw, &palette );
+   mainWindow->setAction( ButtonPress, mainWindow_buttonPress, &palette );
+   mainWindow->setAction( ButtonRelease, mainWindow_buttonRelease, nullptr );
+   mainWindow->setAction( KeyPress, mainWindow_keyPress, nullptr );
+   mainWindow->setAction( Expose, mainWindow_draw, &palette );
+   mainWindow->setAction( MapNotify, mainWindow_draw, &palette );
+   mainWindow->setAction( ConfigureNotify, mainWindow_draw, &palette );
 
+   // Main loop
    mainWindow->open( true );
 
    XEvent event;
@@ -175,7 +177,7 @@ std::string getArg( const std::multimap<std::string,std::string> &arg,
 }
 
 //------------------------------------------------------------------------------
-bool redraw( XX::Window *window, XEvent& event, void *resources ) {
+bool mainWindow_draw( XX::Window *window, XEvent& event, void *resources ) {
    GraphicsPreferences *palette = (GraphicsPreferences *)resources;
    switch( event.type ) {
 
@@ -202,18 +204,6 @@ bool redraw( XX::Window *window, XEvent& event, void *resources ) {
    window->display()->flush();
    return true;
 }
-
-//------------------------------------------------------------------------------
-bool drawPopup( XX::Window *window, XEvent& event, void *resources ) {
-   GraphicsPreferences *palette = (GraphicsPreferences *)resources;
-
-   window->drawText( palette->color[0], palette->font, 10, 20, 
-         "Popup! Click anywhere to close." );
-
-   window->display()->flush();
-   return true;
-}
-
 
 //------------------------------------------------------------------------------
 std::string modState( unsigned int eventState ) {
@@ -317,19 +307,27 @@ extern "C" void signalHandler( int theSignal ) {
 }
 
 //------------------------------------------------------------------------------
-bool onButtonPress( XX::Window *window, XEvent& event, void *resources ) {
+bool mainWindow_buttonPress( XX::Window *window, XEvent& event, void *resources ) {
    GraphicsPreferences *palette = (GraphicsPreferences *)resources;
 
    switch( event.xbutton.button ) {
+      case 1:
+         if (palette->isDrawing) {
+            palette->isDrawing = false;
+         } else {
+            palette->isDrawing = true;
+         }
+         break;
+
       case 3:
          if (palette->popup == nullptr) {
             palette->popup = new XX::Window( window, 
                   event.xbutton.x, event.xbutton.y, 270, 30, 
                   nullptr, 3, palette->color[0], true );
-            palette->popup->setAction( ButtonPress, closePopup, nullptr );
-            palette->popup->setAction( Expose, drawPopup, palette );
-            palette->popup->setAction( MapNotify, drawPopup, palette );
-            palette->popup->setAction( ConfigureNotify, drawPopup, palette );
+            palette->popup->setAction( ButtonPress, popup_close, nullptr );
+            palette->popup->setAction( Expose, popup_draw, palette );
+            palette->popup->setAction( MapNotify, popup_draw, palette );
+            palette->popup->setAction( ConfigureNotify, popup_draw, palette );
          } 
          if (!palette->popup->isOpen()) {
             palette->popup->moveTo( event.xbutton.x, event.xbutton.y );
@@ -349,13 +347,7 @@ bool onButtonPress( XX::Window *window, XEvent& event, void *resources ) {
 }
 
 //------------------------------------------------------------------------------
-bool closePopup( XX::Window *window, XEvent& event, void *unused ) {
-   window->close();
-   return true;
-}
-
-//------------------------------------------------------------------------------
-bool onButtonRelease( XX::Window *window, XEvent& event, void *unused ) {
+bool mainWindow_buttonRelease( XX::Window *window, XEvent& event, void *unused ) {
     // Button 4 = Scroll up
     // Button 5 = Scroll down
    std::cout << "Window[" << window->getXID() << "]: ";
@@ -365,7 +357,7 @@ bool onButtonRelease( XX::Window *window, XEvent& event, void *unused ) {
 }
 
 //------------------------------------------------------------------------------
-bool onKeyPress( XX::Window *window, XEvent& event, void *unused ) {
+bool mainWindow_keyPress( XX::Window *window, XEvent& event, void *unused ) {
    XComposeStatus composeStatus;
    KeySym         keySym;
    char           keyBuffer[ BUFFER_SIZE+1 ];
@@ -635,3 +627,21 @@ bool onKeyPress( XX::Window *window, XEvent& event, void *unused ) {
 
    return true;
 }
+
+//------------------------------------------------------------------------------
+bool popup_draw( XX::Window *window, XEvent& event, void *resources ) {
+   GraphicsPreferences *palette = (GraphicsPreferences *)resources;
+
+   window->drawText( palette->color[0], palette->font, 10, 20, 
+         "Popup! Click anywhere to close." );
+
+   window->display()->flush();
+   return true;
+}
+
+//------------------------------------------------------------------------------
+bool popup_close( XX::Window *window, XEvent& event, void *unused ) {
+   window->close();
+   return true;
+}
+
