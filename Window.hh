@@ -17,8 +17,6 @@ namespace XX {
    class PixMap;
    class Window;
 
-   // typedef bool (*EventHandler)( Window *, XEvent&, void * );
-
 /**
  * @brief Window is a GUI window.
  *

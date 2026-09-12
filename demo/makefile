@@ -6,8 +6,8 @@
 include ~/git/make.rules
 
 TARGET= demo
-OBJECTS= demo.o
-SOURCES= demo.cc
+OBJECTS= demo.o DemoEventHandler.o
+SOURCES= demo.cc DemoEventHandler.cc
 LIBS=  -lXX -lX11
 
 $(TARGET): $(SOURCES)
