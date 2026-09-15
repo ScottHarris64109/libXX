@@ -36,6 +36,8 @@
 #include <XX/Font.hh>
 
 #include "Palette.h"
+#include "Point.hh"
+#include "Line.hh"
 #include "DemoEventHandler.hh"
 
 // Used by error handlers to break the main loop.
@@ -44,7 +46,6 @@ bool aborted = false;
 std::multimap<std::string,std::string> parse_args( int argc, char *argv[] );
 std::string getArg( const std::multimap<std::string,std::string> &arg, 
       std::string key, int index=0, std::string defaultValue = "" );
-std::string modState( unsigned int eventState );
 extern "C" void signalHandler( int theSignal );
 
 //==============================================================================
@@ -62,6 +63,27 @@ int main( int argc, char *argv[] ) {
    MainWindowButtonRelease mainWindowButtonRelease;
    MainWindowKeyPress mainWindowKeyPress;
    MainWindowDraw drawMainWindow;
+
+   Point a;
+   Point b(1,2);
+   Point c( {3,4} );
+   Point d = a;
+   d = {7,8};
+   d.move( 5,6 );
+   d.move( (int[]){ 1,1 } );
+
+   Line ab(a,b);
+   Line cd(c,c);
+
+   cd.setPoint(1,d);
+   d.move(-1,-1);
+
+   std::cout << "Point A = " << a << "\n";
+   std::cout << "Point B = " << b << "\n";
+   std::cout << "Point C = " << c << "\n";
+   std::cout << "Point D = " << d << "\n";
+   std::cout << "Line AB = " << ab << "\n";
+   std::cout << "Line CD = " << cd << "\n";
 
    signal( SIGABRT, signalHandler );
    signal( SIGTERM, signalHandler );

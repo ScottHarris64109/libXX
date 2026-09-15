@@ -14,10 +14,6 @@
 #include "Palette.h"
 #include "DemoEventHandler.hh"
 
-void DemoEventHandler::setPalette( Palette *palette ) {
-   this->palette = palette;
-}
-
 std::string DemoEventHandler::modState( unsigned int eventState ) {
    std::string out="[";
    bool started = false;
@@ -409,6 +405,10 @@ bool MainWindowKeyPress::operator()( XX::Window *window, XEvent& event ) {
    return true;
 }
 
+void MainWindowDraw::setPalette( Palette *palette ) {
+   this->palette = palette;
+}
+
 bool MainWindowDraw::operator()( XX::Window *window, XEvent& event ) {
    switch( event.type ) {
 
@@ -437,6 +437,10 @@ bool MainWindowDraw::operator()( XX::Window *window, XEvent& event ) {
 }
 
 //-- Popup Window -------------------------------------------------------------
+
+void PopupDraw::setPalette( Palette *palette ) {
+   this->palette = palette;
+}
 
 bool PopupDraw::operator()( XX::Window *window, XEvent& event ) {
    window->drawText( palette->color[0], palette->font, 10, 20, 

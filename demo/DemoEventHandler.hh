@@ -13,7 +13,7 @@
 
 /**
  * @brief DemoEventHandler is a semi-abstract local superclass for the 
- *    EventHandlers in this demo.  It encapsulates palette injection and
+ *    EventHandlers in this demo.  It encapsulates the functor method and
  *    modifier key state settings.
  */
 class DemoEventHandler: public XX::Window::EventHandler {
@@ -21,12 +21,10 @@ class DemoEventHandler: public XX::Window::EventHandler {
 private:
 
 protected:
-   Palette *palette{ nullptr };
    std::string modState( unsigned int eventState );
 
 public:
    // virtual bool operator()( XX::Window *window, XEvent& event ) { return false; };
-   void setPalette( Palette *palette );
 };
 
 
@@ -40,22 +38,33 @@ public:
 };
 
 class MainWindowButtonRelease: public DemoEventHandler {
+public:
    bool operator()( XX::Window *window, XEvent& event );
 };
 
 class MainWindowKeyPress: public DemoEventHandler {
+public:
    bool operator()( XX::Window *window, XEvent& event );
 };
 
 class MainWindowDraw: public DemoEventHandler {
+protected:
+   Palette *palette{ nullptr };
+public:
    bool operator()( XX::Window *window, XEvent& event );
+   void setPalette( Palette *palette );
 };
 
 class PopupDraw: public DemoEventHandler {
+protected:
+   Palette *palette{ nullptr };
+public:
    bool operator()( XX::Window *window, XEvent& event );
+   void setPalette( Palette *palette );
 };
 
 class PopupClose: public DemoEventHandler {
+public:
    bool operator()( XX::Window *window, XEvent& event );
 };
 
