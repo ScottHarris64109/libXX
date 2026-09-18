@@ -65,8 +65,8 @@ private:
    std::string   title_;
    std::unordered_map<XID, Window*> children;
    std::unordered_map<int, EventHandler*> reaction;
-   XX::Color    *background;
-   XX::Color    *border;
+   XX::Color     background;
+   XX::Color     border;
    XX::Color     traceColor;
    Atom          closeAtom;
    bool          is_open;
@@ -101,8 +101,8 @@ public:
     * one of its Windows.
     */
    Window( XX::Screen *screen, int atX, int atY, int width, int height, 
-        XX::Color *background=nullptr, int borderWidth=-1, 
-        XX::Color *borderColor=nullptr, bool overrideRedirect=false,
+        XX::Color& background, int borderWidth, 
+        XX::Color& borderColor, bool overrideRedirect=false,
         XX::PixMap *icon=nullptr, std::string title="" );
 
    /**
@@ -117,14 +117,14 @@ public:
     * one of its Windows.
     */
    Window( Window *parent, int atX, int atY, int width, int height, 
-        XX::Color *background=nullptr, int borderWidth=-1, 
-        XX::Color *borderColor=nullptr, bool overrideRedirect=false,
+        XX::Color& background, int borderWidth, 
+        XX::Color& borderColor, bool overrideRedirect=false,
         XX::PixMap *icon=nullptr, std::string title="" );
 
    //== Accessors ==============================================================
 
    inline XX::Screen *screen( void ) const { return this->screen_; }
-   inline XX::Color *getBackground( void ) const { return this->background; }
+   inline XX::Color getBackground( void ) const { return this->background; }
    inline bool isOpen( void ) const { return this->is_open; }
    inline std::string title( void ) const { return this->title_; }
 
@@ -158,17 +158,17 @@ public:
    //== Trace Operations =======================================================
 
    /// Trace a line.
-   void traceLine( XX::Color *color, int x1, int y1, int x2, int y2 );
+   void traceLine( XX::Color &color, int x1, int y1, int x2, int y2 );
 
    /// Trace a rectangle.
-   void traceRectangle( XX::Color *color, int x, int y, int width, int height );
+   void traceRectangle( XX::Color &color, int x, int y, int width, int height );
 
    /// Trace an arc.
-   void traceArc( XX::Color *color, int x, int y, int width, int height, 
+   void traceArc( XX::Color &color, int x, int y, int width, int height, 
          double start, double sweep );
 
    /// Trace text.
-   void traceText( XX::Color *color, XX::Font *font, int x, int y, 
+   void traceText( XX::Color &color, XX::Font *font, int x, int y, 
          const std::string text );
 
 }; // class

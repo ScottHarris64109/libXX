@@ -52,14 +52,14 @@ XX::Screen::Screen( XX::Display *display, int index ) :
 /**
  *  Look up a color by name.
  *
- * @return the Color or nullptr
+ * @return the Color.
  */
 
-XX::Color *XX::Screen::getColor( const std::string name ) {
+XX::Color XX::Screen::getColor( const std::string name ) {
    XColor definition, hardwareColor;
    int found = 0;
    char softName[ 255 ];
-   XX::Color *color = nullptr;
+   XX::Color color;
 
    if (name.length() < 255)
    {
@@ -70,10 +70,9 @@ XX::Color *XX::Screen::getColor( const std::string name ) {
    }
 
    if (found) {
-      color = new XX::Color( definition.red, definition.green, 
-            definition.blue );
+      color = { definition.red, definition.green, definition.blue };
    } else {
-      //throw std::runtime_error( "No such color." );
+      throw std::runtime_error( "No such color." );
    }
 
    return color;

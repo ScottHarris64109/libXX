@@ -59,7 +59,7 @@ public:
 
    inline Display *display() const { return display_; };
 
-   Color *getColor( const std::string name );
+   Color getColor( const std::string name );
 
 }; // class
 }; // namespace

@@ -134,7 +134,8 @@ int main( int argc, char *argv[] ) {
 
    XX::Window *mainWindow = new XX::Window( display.screen(), 
          500, 100, 500, 500, 
-         palette.background, -1, nullptr, false, icon, "libXX demo"  );
+         palette.background, 0, palette.background, false, 
+         icon, "libXX demo"  );
    mainWindow->setAction( ButtonPress, &mainWindowButtonPress );
    mainWindow->setAction( ButtonRelease, &mainWindowButtonRelease );
    mainWindow->setAction( MotionNotify, &mainWindowMouseMove );
@@ -164,9 +165,6 @@ int main( int argc, char *argv[] ) {
    mainWindow->close( true );
 
    delete palette.font;
-   delete palette.color[0];
-   delete palette.color[1];
-   delete palette.background;
    delete icon;
    exit( EXIT_SUCCESS );
 }

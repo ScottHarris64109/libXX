@@ -65,7 +65,7 @@ XX::Window::Window( XX::Screen *scr ) : Drawable( scr->display() ),
    this->width  = this->screen()->width();
    this->depth  = this->screen()->colorDepth();
    this->background = this->screen()->getColor( "white" );
-   this->borderWidth = 3;
+   this->borderWidth = 0;
    this->border = this->background;
    this->title_ = "";
 
@@ -78,8 +78,8 @@ XX::Window::Window( XX::Screen *scr ) : Drawable( scr->display() ),
 }
 
 XX::Window::Window( XX::Screen *scr,
-      int originX, int originY, int width, int height, XX::Color *background,
-      int borderWidth, XX::Color *border, bool overrideRedirect, 
+      int originX, int originY, int width, int height, XX::Color& background,
+      int borderWidth, XX::Color& border, bool overrideRedirect, 
       XX::PixMap *icon, std::string title ) : Drawable( scr->display() ),
             screen_( scr ), 
             originX( originX ), originY( originY ), 
@@ -94,8 +94,8 @@ XX::Window::Window( XX::Screen *scr,
 }
 
 XX::Window::Window( XX::Window *parent, 
-      int originX, int originY, int width, int height, XX::Color *background,
-      int borderWidth, XX::Color *border, bool overrideRedirect,
+      int originX, int originY, int width, int height, XX::Color& background,
+      int borderWidth, XX::Color& border, bool overrideRedirect,
       XX::PixMap *icon, std::string title ) : Drawable( parent->display() ),
             parent( parent ), originX( originX ), originY( originY ), 
             background( background ),
@@ -112,20 +112,14 @@ void XX::Window::initialize( bool overrideRedirect, XX::PixMap *icon ) {
    XSetWindowAttributes attributes;
    unsigned long        mask = 0;
 
-   if (background == nullptr) {
-      background = parent->background;
-   }
    if (borderWidth < 0) {
       borderWidth = parent->borderWidth;
    }
-   if (border == nullptr) {
-      border = parent->border;
-   }
    is_open = false;
 
-   attributes.border_pixel     = border->getPixel();
+   attributes.border_pixel     = border.getPixel();
    mask |= CWBorderPixel;
-   attributes.background_pixel = background->getPixel();
+   attributes.background_pixel = background.getPixel();
    mask |= CWBackPixel;
    attributes.override_redirect = (overrideRedirect) ? True: False;
    mask |= CWOverrideRedirect;
@@ -167,6 +161,9 @@ void XX::Window::initialize( bool overrideRedirect, XX::PixMap *icon ) {
          this->traceContext, GXxor );
    this->makeContext();
 }
+
+//== Accessors =================================================================
+
 
 //== EventHandlers =============================================================
 
@@ -331,34 +328,34 @@ void XX::Window::moveTo( int x, int y ) {
 
 //== Trace Operations ==========================================================
 
-void XX::Window::traceLine( XX::Color *color, int x1, int y1, int x2, int y2 ) {
-   traceColor = color->complement();
+void XX::Window::traceLine( XX::Color &color, int x1, int y1, int x2, int y2 ) {
+   traceColor = color.complement();
    XSetForeground( this->display()->xDisplay(), this->traceContext, 
          traceColor.getPixel() );
    XDrawLine( this->display()->xDisplay(), this->getXID(), this->traceContext, 
          x1, y1, x2, y2 );
 }
 
-void XX::Window::traceRectangle( XX::Color *color, int x, int y, int width, int height ) {
-   traceColor = color->complement();
+void XX::Window::traceRectangle( XX::Color &color, int x, int y, int width, int height ) {
+   traceColor = color.complement();
    XSetForeground( this->display()->xDisplay(), this->traceContext, 
          traceColor.getPixel() );
    XDrawRectangle( this->display()->xDisplay(), this->getXID(), 
          this->traceContext, x, y, width, height );
 }
 
-void XX::Window::traceArc( XX::Color *color, int x, int y, 
+void XX::Window::traceArc( XX::Color &color, int x, int y, 
       int width, int height, double start, double sweep ) {
-   traceColor = color->complement();
+   traceColor = color.complement();
    XSetForeground( this->display()->xDisplay(), this->traceContext, 
          traceColor.getPixel() );
    XDrawArc( this->display()->xDisplay(), this->getXID(), this->traceContext, 
          x, y, width, height, x11angle( start ), x11angle( sweep ) );
 }
 
-void XX::Window::traceText( XX::Color *color, XX::Font *font, int x, int y, 
+void XX::Window::traceText( XX::Color &color, XX::Font *font, int x, int y, 
       const std::string text ) {
-   traceColor = color->complement();
+   traceColor = color.complement();
    XSetForeground( this->display()->xDisplay(), this->traceContext, 
          traceColor.getPixel() );
    XSetFont( this->display()->xDisplay(), this->traceContext, 

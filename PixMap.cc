@@ -18,11 +18,6 @@
  *#############################################################################
  */
 #include <string>
-#include <stdexcept>
-//#include <iostream>
-//#include <stdlib.h>
-//#include <errno.h>
-#include <cstdint>
 
 #include "Display.hh"
 #include "Screen.hh"

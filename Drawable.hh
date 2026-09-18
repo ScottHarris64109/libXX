@@ -50,31 +50,31 @@ public:
    //== Operations =============================================================
 
    /// Draw a point.
-   void drawPoint( XX::Color *color, int x, int y );
+   void drawPoint( XX::Color &color, int x, int y );
 
    /// Draw a line.
-   void drawLine( XX::Color *color, int x1, int y1, int x2, int y2 );
+   void drawLine( XX::Color &color, int x1, int y1, int x2, int y2 );
 
    /// Draw a rectangle.
-   void drawRectangle( XX::Color *color, int x, int y, int width, int height );
+   void drawRectangle( XX::Color &color, int x, int y, int width, int height );
 
    /// Draw and fill in a rectangle.
-   void fillRectangle( XX::Color *color, int x, int y, int width, int height );
+   void fillRectangle( XX::Color &color, int x, int y, int width, int height );
 
    /// Draw an arc.
-   void drawArc( XX::Color *color, int x, int y, int width, int height, 
+   void drawArc( XX::Color &color, int x, int y, int width, int height, 
          double start, double sweep );
 
    /// Draw and fill in an arc.
-   void fillArc( XX::Color *color, int x, int y, int width, int height, 
+   void fillArc( XX::Color &color, int x, int y, int width, int height, 
          double start, double sweep );
 
    /// Draw text with no background.
-   void drawText( XX::Color *color, XX::Font *font, int x, int y, 
+   void drawText( XX::Color &color, XX::Font *font, int x, int y, 
          const std::string text );
 
    /// Draw text and fill in its background.
-   void fillText( XX::Color *color, XX::Font *font, int x, int y, 
+   void fillText( XX::Color &color, XX::Font *font, int x, int y, 
          const std::string text );
 
 }; // class

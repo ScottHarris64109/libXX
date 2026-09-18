@@ -10,7 +10,6 @@
 #include "Drawable.hh"
 #include "Screen.hh"
 #include "Window.hh"
-#include "Color.hh"
 
 namespace XX {
 

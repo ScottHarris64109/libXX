@@ -61,65 +61,65 @@ void XX::Drawable::makeContext() {
    }
 }
 
-void XX::Drawable::drawPoint( XX::Color *color, int x, int y ) {
+void XX::Drawable::drawPoint( XX::Color &color, int x, int y ) {
    XSetForeground( this->display()->xDisplay(), this->context, 
-         color->getPixel() );
+         color.getPixel() );
    XDrawPoint( this->display()->xDisplay(), this->getXID(), this->context, 
          x, y );
 }
 
-void XX::Drawable::drawLine( XX::Color *color, int x1, int y1, int x2, int y2 ) {
+void XX::Drawable::drawLine( XX::Color &color, int x1, int y1, int x2, int y2 ) {
    XSetForeground( this->display()->xDisplay(), this->context, 
-         color->getPixel() );
+         color.getPixel() );
    XDrawLine( this->display()->xDisplay(), this->getXID(), this->context, 
          x1, y1, x2, y2 );
 }
 
-void XX::Drawable::drawRectangle( XX::Color *color, int x, int y, 
+void XX::Drawable::drawRectangle( XX::Color &color, int x, int y, 
       int width, int height ) {
    XSetForeground( this->display()->xDisplay(), this->context, 
-         color->getPixel() );
+         color.getPixel() );
    XDrawRectangle( this->display()->xDisplay(), this->getXID(), this->context, 
          x, y, width, height );
 }
 
-void XX::Drawable::fillRectangle( XX::Color *color, int x, int y, 
+void XX::Drawable::fillRectangle( XX::Color &color, int x, int y, 
       int width, int height ) {
    XSetForeground( this->display()->xDisplay(), this->context, 
-         color->getPixel() );
+         color.getPixel() );
    XFillRectangle( this->display()->xDisplay(), this->getXID(), this->context, 
          x, y, width, height );
 }
 
-void XX::Drawable::drawArc( XX::Color *color, int x, int y, 
+void XX::Drawable::drawArc( XX::Color &color, int x, int y, 
       int width, int height, double start, double sweep ) {
    XSetForeground( this->display()->xDisplay(), this->context, 
-         color->getPixel() );
+         color.getPixel() );
    XDrawArc( this->display()->xDisplay(), this->getXID(), this->context, 
          x, y, width, height, x11angle( start ), x11angle( sweep ) );
 }
 
-void XX::Drawable::fillArc( XX::Color *color, int x, 
+void XX::Drawable::fillArc( XX::Color &color, int x, 
       int y, int width, int height, double start, double sweep ) {
    XSetForeground( this->display()->xDisplay(), this->context, 
-         color->getPixel() );
+         color.getPixel() );
    XFillArc( this->display()->xDisplay(), this->getXID(), this->context, 
          x, y, width, height, x11angle( start ), x11angle( sweep ) );
 }
 
-void XX::Drawable::drawText( XX::Color *color, XX::Font *font, int x, int y, 
+void XX::Drawable::drawText( XX::Color &color, XX::Font *font, int x, int y, 
       const std::string text ) {
    XSetForeground( this->display()->xDisplay(), this->context, 
-         color->getPixel() );
+         color.getPixel() );
    XSetFont( this->display()->xDisplay(), this->context, font->getXFont() );
    XDrawString( this->display()->xDisplay(), this->getXID(), this->context, 
          x, y, text.c_str(), text.length() );
 }
 
-void XX::Drawable::fillText( XX::Color *color, XX::Font *font, int x, int y, 
+void XX::Drawable::fillText( XX::Color &color, XX::Font *font, int x, int y, 
       const std::string text ) {
    XSetForeground( this->display()->xDisplay(), this->context, 
-         color->getPixel() );
+         color.getPixel() );
    XSetFont( this->display()->xDisplay(), this->context, font->getXFont() );
    XDrawImageString( this->display()->xDisplay(), this->getXID(), this->context,
          x, y, text.c_str(), text.length() );

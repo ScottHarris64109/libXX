@@ -12,8 +12,8 @@
 #include <XX/Font.hh>
 
 typedef struct {
-   XX::Color  *color[2] = { nullptr, nullptr };
-   XX::Color  *background = nullptr;
+   XX::Color  color[2];
+   XX::Color  background;
    XX::Font   *font = nullptr;
 } Palette;
 
