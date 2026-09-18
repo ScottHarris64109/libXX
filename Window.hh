@@ -16,6 +16,7 @@
 namespace XX {
    class PixMap;
    class Window;
+   class Font;
 
 /**
  * @brief Window is a GUI window.
@@ -48,6 +49,10 @@ public:
     * XEvent that triggered it.
     * <p>
     * EventHandlers are assigned using <code>setAction()</code>.
+    * <p>
+    * <i>Trace</i> operations are similar to drawing, but use an XOR pixel 
+    * effect instead of a solid color.  They are useful for "rubber banding"
+    * temporary or tentative figures.
     */
    class EventHandler {
    public:
@@ -55,19 +60,21 @@ public:
    };
 
 private:
-   XX::Screen *screen_;
-   Window  *parent;
-   std::string title_;
+   XX::Screen   *screen_;
+   Window       *parent;
+   std::string   title_;
    std::unordered_map<XID, Window*> children;
    std::unordered_map<int, EventHandler*> reaction;
-   XX::Color   *background;
-   XX::Color   *border;
-   Atom       closeAtom;
-   bool       is_open;
-   int        originX;
-   int        originY;
-   int        borderWidth;
+   XX::Color    *background;
+   XX::Color    *border;
+   XX::Color     traceColor;
+   Atom          closeAtom;
+   bool          is_open;
+   int           originX;
+   int           originY;
+   int           borderWidth;
    unsigned long eventMask;
+   ::GC          traceContext;
 
    Window( XX::Screen *s );  // Screen root
 
@@ -129,7 +136,7 @@ public:
    void setAction( int eventType, EventHandler *action );
 
    /**
-    * Ignopre events of this type.  If an EventHandler and resource bundle have 
+    * Ignore events of this type.  If an EventHandler and resource bundle have 
     * been assigned to this event type, references to them will be dropped.
     * <p>
     * Some event types such as ClientMessage cannot be ignored.
@@ -147,6 +154,22 @@ public:
    void open( bool immediately=false );
    void close( bool immediately=false );
    void moveTo( int x, int y );
+
+   //== Trace Operations =======================================================
+
+   /// Trace a line.
+   void traceLine( XX::Color *color, int x1, int y1, int x2, int y2 );
+
+   /// Trace a rectangle.
+   void traceRectangle( XX::Color *color, int x, int y, int width, int height );
+
+   /// Trace an arc.
+   void traceArc( XX::Color *color, int x, int y, int width, int height, 
+         double start, double sweep );
+
+   /// Trace text.
+   void traceText( XX::Color *color, XX::Font *font, int x, int y, 
+         const std::string text );
 
 }; // class
 }; // namespace

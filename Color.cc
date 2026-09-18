@@ -26,27 +26,39 @@
 
 #include "Color.hh"
 
-//== Constructors =============================================================
+//== Constructors ==============================================================
 
 XX::Color::~Color( ) {
 }
 
-XX::Color::Color( unsigned int red, unsigned int green, unsigned int blue ) {
-   setRed( red );
-   setGreen( green );
-   setBlue( blue );
+XX::Color::Color( unsigned int red, unsigned int green, unsigned int blue ) :
+      red_( red ), blue_( blue ), green_( green ) {
 }
 
-//== Accessors ================================================================
+//== Accessors =================================================================
 
 void XX::Color::setRed( unsigned int value ) {
-   red = value % 256;
+   red_ = value % 256;
 }
 
 void XX::Color::setGreen( unsigned int value ) {
-   green = value % 256;
+   green_ = value % 256;
 }
 
 void XX::Color::setBlue( unsigned int value ) {
-   blue = value % 256;
+   blue_ = value % 256;
+}
+
+//== Operations ================================================================
+
+XX::Color XX::Color::operator=( const unsigned int *rgb ) {
+   this->setRed(   rgb[0] );
+   this->setGreen( rgb[1] );
+   this->setBlue(  rgb[2] );
+   return *this;
+}
+
+XX::Color XX::Color::complement() {
+   XX::Color c( 255-this->red(), 255-this->green(), 255-this->blue() );
+   return c;
 }

@@ -12,6 +12,7 @@
 #include <X11/Xproto.h>
 
 #include "Palette.h"
+#include "Drawing.hh"
 #include "DemoEventHandler.hh"
 
 std::string DemoEventHandler::modState( unsigned int eventState ) {
@@ -98,13 +99,23 @@ void MainWindowButtonPress::setPopup( XX::Window *popup ) {
    this->popup = popup;
 }
 
+void MainWindowButtonPress::setDrawing( Drawing *drawing ) {
+   this->drawing = drawing;
+}
+
 bool MainWindowButtonPress::operator()( XX::Window *window, XEvent& event ) {
    switch( event.xbutton.button ) {
       case 1:
-         if (this->isDrawing) {
-            this->isDrawing = false;
+         if (this->drawing->isDrawingLines()) {
+            this->drawing->drawLineTo( event.xbutton.x, event.xbutton.y );
          } else {
-            this->isDrawing = true;
+            this->drawing->startLine( event.xbutton.x, event.xbutton.y );
+         }
+         break;
+
+      case 2:
+         if (this->drawing->isDrawingLines()) {
+            this->drawing->stopDrawingLines();
          }
          break;
 
@@ -122,6 +133,17 @@ bool MainWindowButtonPress::operator()( XX::Window *window, XEvent& event ) {
          std::cout << "Pressed " << modState( event.xbutton.state ) << " ";
          std::cout << "button " << event.xbutton.button << ".\n";
          break;
+   }
+   return true;
+}
+
+void MainWindowMouseMove::setDrawing( Drawing *drawing ) {
+   this->drawing = drawing;
+}
+
+bool MainWindowMouseMove::operator()( XX::Window *window, XEvent& event ) {
+   if (this->drawing->isDrawingLines()) {
+      this->drawing->traceLineTo( event.xmotion.x, event.xmotion.y );
    }
    return true;
 }
@@ -407,6 +429,10 @@ bool MainWindowKeyPress::operator()( XX::Window *window, XEvent& event ) {
 
 void MainWindowDraw::setPalette( Palette *palette ) {
    this->palette = palette;
+}
+
+void MainWindowDraw::setDrawing( Drawing *drawing ) {
+   this->drawing = drawing;
 }
 
 bool MainWindowDraw::operator()( XX::Window *window, XEvent& event ) {

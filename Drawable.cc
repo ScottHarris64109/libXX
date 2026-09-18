@@ -22,6 +22,7 @@
 #include <iostream>
 #include <stdlib.h>
 #include <errno.h>
+#include <exception>
 
 #include "Display.hh"
 #include "Drawable.hh"
@@ -54,6 +55,10 @@ void XX::Drawable::makeContext() {
 
    this->context = XCreateGC( this->display()->xDisplay(), this->getXID(), 
          mask, &settings );
+   if (!this->context) {
+      std::cerr << "Could not acquire X11 Graphic Context.\n";
+      throw new std::bad_alloc;
+   }
 }
 
 void XX::Drawable::drawPoint( XX::Color *color, int x, int y ) {
@@ -91,7 +96,7 @@ void XX::Drawable::drawArc( XX::Color *color, int x, int y,
    XSetForeground( this->display()->xDisplay(), this->context, 
          color->getPixel() );
    XDrawArc( this->display()->xDisplay(), this->getXID(), this->context, 
-         x, y, width, height, angle( start ), angle( sweep ) );
+         x, y, width, height, x11angle( start ), x11angle( sweep ) );
 }
 
 void XX::Drawable::fillArc( XX::Color *color, int x, 
@@ -99,7 +104,7 @@ void XX::Drawable::fillArc( XX::Color *color, int x,
    XSetForeground( this->display()->xDisplay(), this->context, 
          color->getPixel() );
    XFillArc( this->display()->xDisplay(), this->getXID(), this->context, 
-         x, y, width, height, angle( start ), angle( sweep ) );
+         x, y, width, height, x11angle( start ), x11angle( sweep ) );
 }
 
 void XX::Drawable::drawText( XX::Color *color, XX::Font *font, int x, int y, 

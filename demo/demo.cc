@@ -36,6 +36,7 @@
 #include <XX/Font.hh>
 
 #include "Palette.h"
+#include "Drawing.hh"
 #include "Point.hh"
 #include "Line.hh"
 #include "DemoEventHandler.hh"
@@ -59,10 +60,11 @@ int main( int argc, char *argv[] ) {
    // XX::EventHandlers
    PopupDraw drawPopup;
    PopupClose closeWindow;
-   MainWindowButtonPress mainWindowButtonPress;
+   MainWindowButtonPress   mainWindowButtonPress;
    MainWindowButtonRelease mainWindowButtonRelease;
-   MainWindowKeyPress mainWindowKeyPress;
-   MainWindowDraw drawMainWindow;
+   MainWindowMouseMove     mainWindowMouseMove;
+   MainWindowKeyPress      mainWindowKeyPress;
+   MainWindowDraw          drawMainWindow;
 
    Point a;
    Point b(1,2);
@@ -117,6 +119,12 @@ int main( int argc, char *argv[] ) {
    drawMainWindow.setPalette( &palette );
    drawPopup.setPalette( &palette );
 
+   Drawing drawing;
+   drawing.setPalette( &palette );
+   drawMainWindow.setDrawing( &drawing );
+   mainWindowButtonPress.setDrawing( &drawing );
+   mainWindowMouseMove.setDrawing( &drawing );
+
    XX::PixMap *icon = new XX::PixMap( display.screen(), 24, 24 );
    icon->fillRectangle( palette.background, 0,0, 24,24 );
    icon->drawLine( palette.color[0], 0, 0, 16, 12 );
@@ -129,10 +137,12 @@ int main( int argc, char *argv[] ) {
          palette.background, -1, nullptr, false, icon, "libXX demo"  );
    mainWindow->setAction( ButtonPress, &mainWindowButtonPress );
    mainWindow->setAction( ButtonRelease, &mainWindowButtonRelease );
+   mainWindow->setAction( MotionNotify, &mainWindowMouseMove );
    mainWindow->setAction( KeyPress, &mainWindowKeyPress );
    mainWindow->setAction( Expose, &drawMainWindow );
    mainWindow->setAction( MapNotify, &drawMainWindow );
    mainWindow->setAction( ConfigureNotify, &drawMainWindow );
+   drawing.setWindow( mainWindow );
 
    XX::Window *popup = new XX::Window( mainWindow, 
          0, 0, 270, 30, palette.background, 3, palette.color[0], true );

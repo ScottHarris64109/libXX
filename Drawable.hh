@@ -19,10 +19,6 @@ namespace XX {
 class Drawable {
 
 private:
-   // Convert decimal degrees to X11 angle units.
-   inline int angle( double degrees ) const {
-      return (int)((degrees * 64.0) + 0.5);
-   }
 
 protected:
    XX::Display *display_;
@@ -36,6 +32,11 @@ protected:
    virtual ~Drawable();
 
    void makeContext( void );
+
+   // Convert decimal degrees to X11 angle units.
+   inline int x11angle( double degrees ) const {
+      return (int)((degrees * 64.0) + 0.5);
+   }
 
 public:
    //== Accessors ==============================================================

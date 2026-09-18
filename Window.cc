@@ -26,9 +26,10 @@
 #include "Drawable.hh"
 #include "Window.hh"
 #include "Color.hh"
+#include "Font.hh"
 #include "PixMap.hh"
 
-//== Constructors =============================================================
+//== Constructors ==============================================================
 
 /**
  *  Destroy and deallocate a Window object.
@@ -39,6 +40,8 @@ XX::Window::~Window( ) {
    {
       delete this->children.begin()->second;
    }
+   // Delete traceContext context.
+   XFreeGC( this->display()->xDisplay(), this->traceContext );
    // Detach from parent.
    if (this->parent) {
       this->parent->children.erase( this->getXID() );
@@ -159,9 +162,13 @@ void XX::Window::initialize( bool overrideRedirect, XX::PixMap *icon ) {
          &this->closeAtom, 1);
 
    this->makeContext();
+   this->traceContext = this->context;
+   XSetFunction( this->screen()->display()->xDisplay(), 
+         this->traceContext, GXxor );
+   this->makeContext();
 }
 
-//== EventHandlers ============================================================
+//== EventHandlers =============================================================
 
 void XX::Window::setAction( int eventType, XX::Window::EventHandler *action )
 {
@@ -298,7 +305,7 @@ bool XX::Window::actOn( XEvent& event ) {
    return handled;
 }
 
-//== Operations ===============================================================
+//== Operations ================================================================
 
 void XX::Window::open( bool immediately ) {
    XMapWindow( this->screen()->display()->xDisplay(), getXID() );
@@ -321,3 +328,43 @@ void XX::Window::moveTo( int x, int y ) {
    this->originX = x;
    this->originY = y;
 }
+
+//== Trace Operations ==========================================================
+
+void XX::Window::traceLine( XX::Color *color, int x1, int y1, int x2, int y2 ) {
+   traceColor = color->complement();
+   XSetForeground( this->display()->xDisplay(), this->traceContext, 
+         traceColor.getPixel() );
+   XDrawLine( this->display()->xDisplay(), this->getXID(), this->traceContext, 
+         x1, y1, x2, y2 );
+}
+
+void XX::Window::traceRectangle( XX::Color *color, int x, int y, int width, int height ) {
+   traceColor = color->complement();
+   XSetForeground( this->display()->xDisplay(), this->traceContext, 
+         traceColor.getPixel() );
+   XDrawRectangle( this->display()->xDisplay(), this->getXID(), 
+         this->traceContext, x, y, width, height );
+}
+
+void XX::Window::traceArc( XX::Color *color, int x, int y, 
+      int width, int height, double start, double sweep ) {
+   traceColor = color->complement();
+   XSetForeground( this->display()->xDisplay(), this->traceContext, 
+         traceColor.getPixel() );
+   XDrawArc( this->display()->xDisplay(), this->getXID(), this->traceContext, 
+         x, y, width, height, x11angle( start ), x11angle( sweep ) );
+}
+
+void XX::Window::traceText( XX::Color *color, XX::Font *font, int x, int y, 
+      const std::string text ) {
+   traceColor = color->complement();
+   XSetForeground( this->display()->xDisplay(), this->traceContext, 
+         traceColor.getPixel() );
+   XSetFont( this->display()->xDisplay(), this->traceContext, 
+         font->getXFont() );
+   XDrawString( this->display()->xDisplay(), this->getXID(), 
+         this->traceContext, 
+         x, y, text.c_str(), text.length() );
+}
+

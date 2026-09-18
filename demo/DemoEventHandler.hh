@@ -10,6 +10,7 @@
 #include <XX/Window.hh>
 
 #include "Palette.h"
+#include "Drawing.hh"
 
 /**
  * @brief DemoEventHandler is a semi-abstract local superclass for the 
@@ -24,22 +25,35 @@ protected:
    std::string modState( unsigned int eventState );
 
 public:
-   // virtual bool operator()( XX::Window *window, XEvent& event ) { return false; };
+   /*
+   virtual bool operator()( XX::Window *window, XEvent& event ) { 
+      return false; 
+   };
+    */
 };
 
 
 class MainWindowButtonPress: public DemoEventHandler {
 private:
    XX::Window *popup{ nullptr };
-   bool isDrawing{ false };
+   Drawing    *drawing{ nullptr };
 public:
-   void setPopup( XX::Window *popup );
    bool operator()( XX::Window *window, XEvent& event );
+   void setPopup( XX::Window *popup );
+   void setDrawing( Drawing *drawing );
 };
 
 class MainWindowButtonRelease: public DemoEventHandler {
 public:
    bool operator()( XX::Window *window, XEvent& event );
+};
+
+class MainWindowMouseMove: public DemoEventHandler {
+private:
+   Drawing *drawing{ nullptr };
+public:
+   bool operator()( XX::Window *window, XEvent& event );
+   void setDrawing( Drawing *drawing );
 };
 
 class MainWindowKeyPress: public DemoEventHandler {
@@ -50,9 +64,11 @@ public:
 class MainWindowDraw: public DemoEventHandler {
 protected:
    Palette *palette{ nullptr };
+   Drawing *drawing{ nullptr };
 public:
    bool operator()( XX::Window *window, XEvent& event );
    void setPalette( Palette *palette );
+   void setDrawing( Drawing *drawing );
 };
 
 class PopupDraw: public DemoEventHandler {

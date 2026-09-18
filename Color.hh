@@ -17,12 +17,10 @@ namespace XX {
 class Color {
 
 private:
-   unsigned int red;
-   unsigned int blue;
-   unsigned int green;
+   unsigned int red_;
+   unsigned int blue_;
+   unsigned int green_;
 
-   //void lookupColor( XX::Display *display, int screen, const char *name );
- 
 protected:
 
 public:
@@ -32,47 +30,32 @@ public:
    virtual ~Color();
 
    /// Create a Color from RGB component values.
-   Color( unsigned int red, unsigned int green, unsigned int blue );
+   Color( unsigned int red=0, unsigned int green=0, unsigned int blue=0 );
 
-   // Look up a Color by name.
-   //Color( XX::Display *display, string name );
+   //== Comparisons ============================================================
 
-   // Look up a Color by name.
-   //Color( XX::Display *display, const char *name );
-
-   // Look up a Color by name.
-   //Color( XX::Display *display, int screen, string name );
-
-   // Look up a Color by name.
-   //Color( XX::Display *display, int screen, const char *name );
-
-   // Look up a Color by name.
-   //Color( XX::Window *window, string name );
-
-   // Look up a Color by name.
-   //Color( XX::Window *window, const char *name );
-
-   // Look up a Color by name.
-   //Color( XX::GC *gc, string name );
-
-   // Look up a Color by name.
-   //Color( XX::GC *gc, const char *name );
+   /// Equal-to comparison.
+   inline bool operator==( const Color &that ) const { 
+      return (this->red() == that.red() 
+           && this->blue() == that.blue() 
+           && this->green() == that.green()) ? true: false; 
+   };
 
    //== Accessors ==============================================================
 
    /// Get the X11 Color pixel value.
    inline unsigned long getPixel( void ) {
-      return (red << 16) | (green << 8) | blue;
+      return (red_ << 16) | (green_ << 8) | blue_;
    }
 
    /// Get the red component in the RGB color model.
-   inline unsigned int getRed( void ) const { return red; }
+   inline unsigned int red( void ) const { return red_; }
 
    /// Get the green component in the RGB color model.
-   inline unsigned int getGreen( void ) const { return green; }
+   inline unsigned int green( void ) const { return green_; }
 
    /// Get the blue component in the RGB color model.
-   inline unsigned int getBlue( void ) const { return blue; }
+   inline unsigned int blue( void ) const { return blue_; }
 
    /// Set the red component in the RGB color model.
    void setRed( unsigned int value );
@@ -82,6 +65,14 @@ public:
 
    /// Set the blue component in the RGB color model.
    void setBlue( unsigned int value );
+
+   //== Operations =============================================================
+
+   /// Assign a color using an array of RGB values.
+   Color operator=( const unsigned int * );
+
+   // Get the complement of the color.
+   Color complement();
 
 }; // class
 }; // namespace
