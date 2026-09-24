@@ -25,6 +25,7 @@
 #include <string>
 #include <map>
 
+#include <X11/cursorfont.h>
 #include <X11/keysym.h>
 #include <X11/keysymdef.h>
 #include <X11/Xproto.h>
@@ -65,27 +66,6 @@ int main( int argc, char *argv[] ) {
    MainWindowMouseMove     mainWindowMouseMove;
    MainWindowKeyPress      mainWindowKeyPress;
    MainWindowDraw          drawMainWindow;
-
-   Point a;
-   Point b(1,2);
-   Point c( {3,4} );
-   Point d = a;
-   d = {7,8};
-   d.move( 5,6 );
-   d.move( (int[]){ 1,1 } );
-
-   Line ab(a,b);
-   Line cd(c,c);
-
-   cd.setPoint(1,d);
-   d.move(-1,-1);
-
-   std::cout << "Point A = " << a << "\n";
-   std::cout << "Point B = " << b << "\n";
-   std::cout << "Point C = " << c << "\n";
-   std::cout << "Point D = " << d << "\n";
-   std::cout << "Line AB = " << ab << "\n";
-   std::cout << "Line CD = " << cd << "\n";
 
    signal( SIGABRT, signalHandler );
    signal( SIGTERM, signalHandler );
@@ -151,6 +131,7 @@ int main( int argc, char *argv[] ) {
    popup->setAction( Expose, &drawPopup );
    popup->setAction( MapNotify, &drawPopup );
    popup->setAction( ConfigureNotify, &drawPopup );
+   popup->useCursor( XC_pirate );
    mainWindowButtonPress.setPopup( popup );
 
    // Main loop
@@ -187,8 +168,10 @@ std::multimap<std::string,std::string> parse_args( int argc, char *argv[] ) {
          if (key == "-fg")   key = "-foreground";
          if (key == "-fn")   key = "-font";
          if (key == "-h")    key = "-help";
-         if (key == "-geom") key = "-geometry";
+         if (key == "-geom") key = "-geometry"; // TODO =WxH+X+Y
          if (key == "-name") key = "-title";
+         // -display  Display name
+         // -iconic
       } else {
          value = std::string( argv[a] );
          args.insert( std::pair<std::string,std::string>( key, value ));

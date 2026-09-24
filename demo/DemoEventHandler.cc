@@ -7,6 +7,7 @@
 #include <string.h>
 #include <errno.h>
 
+#include <X11/cursorfont.h>
 #include <X11/keysym.h>
 #include <X11/keysymdef.h>
 #include <X11/Xproto.h>
@@ -110,12 +111,14 @@ bool MainWindowButtonPress::operator()( XX::Window *window, XEvent& event ) {
             this->drawing->drawLineTo( event.xbutton.x, event.xbutton.y );
          } else {
             this->drawing->startLine( event.xbutton.x, event.xbutton.y );
+            window->useCursor( XC_pencil );
          }
          break;
 
       case 2:
          if (this->drawing->isDrawingLines()) {
             this->drawing->stopDrawingLines();
+            window->useParentCursor( );
          }
          break;
 

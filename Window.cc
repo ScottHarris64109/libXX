@@ -326,6 +326,16 @@ void XX::Window::moveTo( int x, int y ) {
    this->originY = y;
 }
 
+void XX::Window::useCursor( int x11cursor ) {
+   Cursor cursor = XCreateFontCursor( this->screen()->display()->xDisplay(), 
+                         x11cursor );
+   XDefineCursor( this->screen()->display()->xDisplay(), getXID(), cursor );
+}
+
+void XX::Window::useParentCursor() {
+   XUndefineCursor( this->screen()->display()->xDisplay(), getXID() );
+}
+
 //== Trace Operations ==========================================================
 
 void XX::Window::traceLine( XX::Color &color, int x1, int y1, int x2, int y2 ) {

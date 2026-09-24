@@ -42,6 +42,7 @@ public:
    void setY( int y );
    Point operator=( const int *that );
 
+   // point.move( (int[]){0,1} );
    Point move( const int *that );
    Point move( int right, int down );
 

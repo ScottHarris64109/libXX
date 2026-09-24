@@ -155,6 +155,9 @@ public:
    void close( bool immediately=false );
    void moveTo( int x, int y );
 
+   void useCursor( int x11cursor );
+   void useParentCursor();
+
    //== Trace Operations =======================================================
 
    /// Trace a line.
