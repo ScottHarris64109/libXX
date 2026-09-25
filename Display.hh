@@ -5,12 +5,14 @@
 #define XX_DISPLAY_HH_
 
 #include <string>
+#include <vector>
 #include <unordered_map>
 #include <X11/Xlib.h>
 
 namespace XX {
    class Screen;
    class Window;
+   class Font;
 
 /**
  * @brief Display represents a display card or X11 server driving at least one 
@@ -28,6 +30,7 @@ private:
    std::string name_;
    ::Display *xdisplay;
    Screen **screen_;
+   std::unordered_map<std::string, Font*> fontByName;
 
    void init( void );
 
@@ -55,9 +58,21 @@ public:
    int vendorRelease( void ) const;
    int protocolVersion( void ) const;
    int protocolRevision( void ) const;
-   int screenCount( void ) const;
 
+   int screenCount( void ) const;
    Screen *screen( int which=-1 ) const;
+
+   /// List available font names.
+   std::vector<std::string> fontNames( std::string pattern="*" );
+
+   /// Get a font by name.
+   Font *getFont( const std::string fontName );
+
+   /// Unload a font that is no longer needed.  Returns <code>nullptr</code>.
+   Font *freeFont( Font *font );
+
+   /// Unload a font that is no longer needed.  Returns <code>nullptr</code>.
+   Font *freeFont( const std::string fontName );
 
    //== Operations =============================================================
 

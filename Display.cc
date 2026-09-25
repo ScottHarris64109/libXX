@@ -17,15 +17,21 @@
  *  along with this library.  If not, see <https://www.gnu.org/licenses/>.
  *#############################################################################
  */
-#include <string.h>
 #include <string>
 #include <stdexcept>
 #include <iostream>
+#include <vector>
+#include <unordered_map>
+#include <algorithm>
+#include <climits>
+
+#include <X11/Xlib.h>
 
 #include "Display.hh"
 #include "Screen.hh"
 #include "Window.hh"
 #include "Color.hh"
+#include "Font.hh"
 
 #define BUFFER_SIZE 255
 
@@ -46,6 +52,11 @@ void initializeX11();
 
 XX::Display::~Display( ) {
    if (this->xdisplay != nullptr) {
+      while (!fontByName.empty()) {
+         XX::Font *font = this->fontByName.begin()->second;
+         this->fontByName.erase( this->fontByName.begin()->first );
+         delete font;
+      }
       XCloseDisplay( this->xdisplay );
    }
 
@@ -100,6 +111,139 @@ XX::Display::Display( std::string displayName ) : name_( displayName ) {
    for (int s = 0; s < this->screenCount(); s++) {
       screen_[s] = new XX::Screen( this, s );
    }
+}
+
+//== Accessors ================================================================
+
+/**
+ *  Return the value of the X11 vendor name.
+ *
+ * @return the X11 vendor name.
+ */
+
+std::string XX::Display::vendorName( void ) const {
+   std::string output( ServerVendor( this->xDisplay() ) );
+   return output;
+}
+
+/**
+ *  Return the value of the X11 vendor release.
+ *
+ * @return the X11 vendor release.
+ */
+
+int XX::Display::vendorRelease( void ) const {
+   return VendorRelease( this->xDisplay() );
+}
+
+/**
+ *  Return the value of the X11 protocol version.
+ *
+ * @return the X11 protocol version.
+ */
+
+int XX::Display::protocolVersion( void ) const {
+   return ProtocolVersion( this->xDisplay() );
+}
+
+/**
+ *  Return the value of the X11 protocol revision.
+ *
+ * @return the X11 protocol revision.
+ */
+
+int XX::Display::protocolRevision( void ) const {
+   return ProtocolRevision( this->xDisplay() );
+}
+
+/**
+ *  Return the number of screens associated with this Display.
+ *
+ * @return the number of screens available.
+ */
+
+int XX::Display::screenCount( void ) const {
+   return ScreenCount( this->xDisplay() );
+}
+
+/**
+ *  Return the requested screen or throw an exception.  
+ *  If the screen number is -1, return the default screen for 
+ *  the display.
+ */
+XX::Screen *XX::Display::screen( int which ) const {
+   int s = which;
+
+   if (which == -1) {
+      s = DefaultScreen( this->xDisplay() );
+   }
+   else if (which < 0) {
+      throw std::range_error( "Screen number cannot be less than zero." );
+   }
+   else if (which >= this->screenCount()) {
+      throw std::range_error( "Screen number is too high." );
+   }
+
+   return this->screen_[s];
+}
+
+/**
+ * Return a vector containing the available font names.  The optional 
+ * <code>pattern</code> can be used as a filter where "*" = one or more 
+ * characters and "?" is a single character wildcard.
+ */
+std::vector<std::string> XX::Display::fontNames( std::string pattern ) {
+   std::vector<std::string> names;
+   char **foundName = nullptr;
+   int foundNames = 0, n = 0;
+
+   foundName = XListFonts( this->xDisplay(), pattern.c_str(), INT_MAX, 
+         &foundNames );
+   if (foundName) {
+      for (n = 0; n < foundNames; n++) {
+         names.push_back( foundName[n] );
+      }
+      XFreeFontNames( foundName );
+      foundName = nullptr;
+   }
+
+   std::sort( names.begin(), names.end() );
+   return names;
+}
+
+/**
+ * Return a single font by name.  The server will load it if needed.
+ * <p>
+ * The server will automatically release all loaded fonts when it shuts down.
+ * The <code>freeFont(*)</code> methods can be used to manually unload fonts
+ * and free up server resources.
+ */
+XX::Font *XX::Display::getFont( const std::string fontName ) {
+   XX::Font *font = this->fontByName[ fontName ];
+
+   if (!font) {
+      font = new XX::Font( this, fontName );
+      this->fontByName[ font->name() ] = font;
+   }
+
+   return font;
+}
+
+/**
+ * Unload a font that is no longer needed.  
+ */
+XX::Font *XX::Display::freeFont( XX::Font *font ) {
+   this->fontByName.erase( font->name() );
+   delete font;
+   return nullptr;
+}
+
+/**
+ * Unload a font that is no longer needed.  
+ */
+XX::Font *XX::Display::freeFont( const std::string fontName ) {
+   XX::Font *font = this->fontByName[ fontName ];
+   return this->freeFont( font );
 }
 
 //== Operations ===============================================================
@@ -168,76 +312,3 @@ bool XX::Display::dispatch( XEvent& event ) {
    return dispatched;
 }
 
-//== Accessors ================================================================
-
-/**
- *  Return the value of the X11 vendor name.
- *
- * @return the X11 vendor name.
- */
-
-std::string XX::Display::vendorName( void ) const {
-   std::string output( ServerVendor( this->xDisplay() ) );
-   return output;
-}
-
-/**
- *  Return the value of the X11 vendor release.
- *
- * @return the X11 vendor release.
- */
-
-int XX::Display::vendorRelease( void ) const {
-   return VendorRelease( this->xDisplay() );
-}
-
-/**
- *  Return the value of the X11 protocol version.
- *
- * @return the X11 protocol version.
- */
-
-int XX::Display::protocolVersion( void ) const {
-   return ProtocolVersion( this->xDisplay() );
-}
-
-/**
- *  Return the value of the X11 protocol revision.
- *
- * @return the X11 protocol revision.
- */
-
-int XX::Display::protocolRevision( void ) const {
-   return ProtocolRevision( this->xDisplay() );
-}
-
-/**
- *  Return the number of screens associated with this Display.
- *
- * @return the X11 protocol revision.
- */
-
-int XX::Display::screenCount( void ) const {
-   return ScreenCount( this->xDisplay() );
-}
-
-/**
- *  Return the requested screen or throw an exception.  
- *  If the screen number is -1, return the default screen for 
- *  the display.
- */
-XX::Screen *XX::Display::screen( int which ) const {
-   int s = which;
-
-   if (which == -1) {
-      s = DefaultScreen( this->xDisplay() );
-   }
-   else if (which < 0) {
-      throw std::range_error( "Screen number cannot be less than zero." );
-   }
-   else if (which >= this->screenCount()) {
-      throw std::range_error( "Screen number is too high." );
-   }
-
-   return this->screen_[s];
-}

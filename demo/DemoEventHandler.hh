@@ -72,11 +72,15 @@ public:
 };
 
 class PopupDraw: public DemoEventHandler {
+private:
+   std::string msg;
 protected:
    Palette *palette{ nullptr };
 public:
    bool operator()( XX::Window *window, XEvent& event );
    void setPalette( Palette *palette );
+   void setMessage( const std::string message );
+   inline std::string message() const { return this->msg; };
 };
 
 class PopupClose: public DemoEventHandler {

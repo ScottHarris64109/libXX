@@ -4,8 +4,7 @@
  *#############################################################################
  */
 #include <iostream>
-#include <string.h>
-#include <errno.h>
+#include <string>
 
 #include <X11/cursorfont.h>
 #include <X11/keysym.h>
@@ -131,6 +130,8 @@ bool MainWindowButtonPress::operator()( XX::Window *window, XEvent& event ) {
 
       // Button 4 = Scroll up
       // Button 5 = Scroll down
+      // Button 9 = Left up
+      // Button 8 = Left down
       default:
          std::cout << "Window[" << window->getXID() << "]: ";
          std::cout << "Pressed " << modState( event.xbutton.state ) << " ";
@@ -472,10 +473,16 @@ void PopupDraw::setPalette( Palette *palette ) {
 }
 
 bool PopupDraw::operator()( XX::Window *window, XEvent& event ) {
-   window->drawText( palette->color[0], palette->font, 10, 20, 
-         "Popup! Click anywhere to close." );
+   window->drawText( palette->color[0], palette->font, 
+         palette->font->width(), 
+         palette->font->height()+palette->font->ascent(),
+         this->message() );
    window->display()->flush();
    return true;
+}
+
+void PopupDraw::setMessage( const std::string text ) {
+   this->msg = text;
 }
 
 bool PopupClose::operator()( XX::Window *window, XEvent& event ) {

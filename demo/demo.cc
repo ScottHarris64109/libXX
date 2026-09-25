@@ -90,14 +90,22 @@ int main( int argc, char *argv[] ) {
          << " x " << display.screen( s )->height() 
          << " x " << display.screen( s )->colorDepth() << "\n";
    }
+   std::cout << "\n";
+
+   std::cout << "Available fonts:\n";
+   for (auto name: display.fontNames()) {
+      std::cout << "  " << name << "\n";
+   }
+   std::cout << "\n";
 
    Palette palette;
-   palette.font = new XX::Font( &display, "variable" );
+   palette.font = display.getFont( "variable" );
    palette.background = display.screen()->getColor( bgname );
    palette.color[0]   = display.screen()->getColor( fg1name );
    palette.color[1]   = display.screen()->getColor( fg2name );
    drawMainWindow.setPalette( &palette );
    drawPopup.setPalette( &palette );
+   drawPopup.setMessage( "Click anywhere to close." );
 
    Drawing drawing;
    drawing.setPalette( &palette );
@@ -126,7 +134,10 @@ int main( int argc, char *argv[] ) {
    drawing.setWindow( mainWindow );
 
    XX::Window *popup = new XX::Window( mainWindow, 
-         0, 0, 270, 30, palette.background, 3, palette.color[0], true );
+         0, 0, 
+         palette.font->width( drawPopup.message() ) + palette.font->width()*2,
+         palette.font->height()*3, 
+         palette.background, 3, palette.color[0], true );
    popup->setAction( ButtonPress, &closeWindow );
    popup->setAction( Expose, &drawPopup );
    popup->setAction( MapNotify, &drawPopup );
@@ -145,7 +156,6 @@ int main( int argc, char *argv[] ) {
 
    mainWindow->close( true );
 
-   delete palette.font;
    delete icon;
    exit( EXIT_SUCCESS );
 }

@@ -40,21 +40,27 @@ XX::Font::~Font( ) {
  */
 
 XX::Font::Font( XX::Display *display, const std::string name ) : 
-      display{ display }, name{ name } {
-   xfont = XLoadQueryFont( display->xDisplay(), name.c_str() );
+      display{ display }, name_{ name } {
+   xfont = XLoadQueryFont( display->xDisplay(), this->name_.c_str() );
 }
 
 //== Accessors =================================================================
 
-int XX::Font::getWidth( ) const {
+int XX::Font::width( ) const {
    return this->xfont->max_bounds.rbearing - this->xfont->max_bounds.lbearing;
 }
 
-int XX::Font::getWidth( const std::string text ) const {
+int XX::Font::width( const std::string text ) const {
    return XTextWidth( this->xfont, text.c_str(), text.length() );
 }
 
-int XX::Font::getHeight( ) const {
+int XX::Font::height( ) const {
    return this->xfont->ascent + this->xfont->descent;
+}
+
+int XX::Font::height( const std::string text ) const {
+   int fullHeight = this->height();
+   // TODO
+   return fullHeight;
 }
 
