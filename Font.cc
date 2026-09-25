@@ -25,7 +25,7 @@
 #include "Display.hh"
 #include "Font.hh"
 
-//== Constructors =============================================================
+//== Constructors ==============================================================
 
 /**
  *  Destroy and deallocate a Font object.
@@ -39,12 +39,22 @@ XX::Font::~Font( ) {
  *  Get the named Font from the Display.
  */
 
-XX::Font::Font( XX::Display *display, const char *fontName ) : display{display} {
-   xfont = XLoadQueryFont( display->xDisplay(), fontName );
-   name = std::string( fontName );
-}
-
 XX::Font::Font( XX::Display *display, const std::string name ) : 
-   display{ display }, name{ name } {
+      display{ display }, name{ name } {
    xfont = XLoadQueryFont( display->xDisplay(), name.c_str() );
 }
+
+//== Accessors =================================================================
+
+int XX::Font::getWidth( ) const {
+   return this->xfont->max_bounds.rbearing - this->xfont->max_bounds.lbearing;
+}
+
+int XX::Font::getWidth( const std::string text ) const {
+   return XTextWidth( this->xfont, text.c_str(), text.length() );
+}
+
+int XX::Font::getHeight( ) const {
+   return this->xfont->ascent + this->xfont->descent;
+}
+

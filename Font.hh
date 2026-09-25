@@ -32,9 +32,6 @@ public:
    /// Look up a font by name.
    Font( XX::Display *display, const std::string fontName );
 
-   /// Look up a font by name.
-   Font( XX::Display *display, const char *fontName );
-
    //== Accessors ==============================================================
 
    /// Get the font name.
@@ -42,6 +39,15 @@ public:
 
    /// Get the X11 font ID.
    inline ::Font getXFont( void ) const { return xfont->fid; }
+
+   /// Get the default character width.
+   int getWidth( ) const;
+
+   /// Get the width of a string rendered with this font.
+   int getWidth( const std::string text ) const;
+
+   /// Get the character height.
+   int getHeight( ) const;
 
    //== Operations =============================================================
 
