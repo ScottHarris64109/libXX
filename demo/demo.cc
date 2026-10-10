@@ -50,6 +50,9 @@ std::string getArg( const std::multimap<std::string,std::string> &arg,
       std::string key, int index=0, std::string defaultValue = "" );
 extern "C" void signalHandler( int theSignal );
 
+void listScreens( XX::Display &display );
+void listFonts( XX::Display &display );
+
 //==============================================================================
 int main( int argc, char *argv[] ) {
    std::multimap<std::string,std::string> arg = parse_args( argc, argv );
@@ -79,23 +82,19 @@ int main( int argc, char *argv[] ) {
    XX::Display display( displayName );
    std::cout << "Got display.\n";
    std::cout << display.vendorName() << " | " << display.name() <<"\n";
-   if (display.screenCount() > 1) {
-      std::cout << display.screenCount() << " screens.\n";
-   } else {
-      std::cout << display.screenCount() << " screen.\n";
-   }
-   for (int s=0; s < display.screenCount(); s++)
-   {
-      std::cout << "  " << s << ". " << display.screen( s )->width() 
-         << " x " << display.screen( s )->height() 
-         << " x " << display.screen( s )->colorDepth() << "\n";
-   }
-   std::cout << "\n";
+   listScreens( display );
+   // listFonts( display );
 
-   std::cout << "Available fonts:\n";
-   for (auto name: display.fontNames()) {
-      std::cout << "  " << name << "\n";
-   }
+#ifdef UTF8_STRING
+   std::cout << "UTF8_STRING\n";
+#else
+   std::cout << "Doesn't have UTF8_STRING\n";
+#endif
+#ifdef X_HAVE_UTF8_STRING
+   std::cout << "X_HAVE_UTF8_STRING\n";
+#else
+   std::cout << "Doesn't X_HAVE_UTF8_STRING\n";
+#endif
    std::cout << "\n";
 
    Palette palette;
@@ -220,3 +219,29 @@ extern "C" void signalHandler( int theSignal ) {
    std::cerr << "Caught " << signalName << " signal.\n";
    aborted = true;
 }
+
+//------------------------------------------------------------------------------
+void listScreens( XX::Display &display ) {
+   if (display.screenCount() > 1) {
+      std::cout << display.screenCount() << " screens.\n";
+   } else {
+      std::cout << display.screenCount() << " screen.\n";
+   }
+   for (int s=0; s < display.screenCount(); s++)
+   {
+      std::cout << "  " << s << ". " << display.screen( s )->width() 
+         << " x " << display.screen( s )->height() 
+         << " x " << display.screen( s )->colorDepth() << "\n";
+   }
+   std::cout << "\n";
+}
+
+//------------------------------------------------------------------------------
+void listFonts( XX::Display &display ) {
+   std::cout << "Available fonts:\n";
+   for (auto name: display.fontNames()) {
+      std::cout << "  " << name << "\n";
+   }
+   std::cout << "\n";
+}
+

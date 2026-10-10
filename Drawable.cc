@@ -114,6 +114,11 @@ void XX::Drawable::drawText( XX::Color &color, XX::Font *font, int x, int y,
    XSetFont( this->display()->xDisplay(), this->context, font->getXFont() );
    XDrawString( this->display()->xDisplay(), this->getXID(), this->context, 
          x, y, text.c_str(), text.length() );
+   /*
+   Xutf8DrawString( this->display()->xDisplay(), this->getXID(), 
+         font_set, this->context, 
+         x, y, text.c_str(), text.length() );
+    */
 }
 
 void XX::Drawable::fillText( XX::Color &color, XX::Font *font, int x, int y, 
