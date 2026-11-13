@@ -13,6 +13,7 @@ namespace XX {
    class Screen;
    class Window;
    class Font;
+   //class Font::Description;
 
 /**
  * @brief Display represents a display card or X11 server driving at least one 
@@ -64,6 +65,11 @@ public:
 
    /// List available font names.
    std::vector<std::string> fontNames( std::string pattern="*" );
+   /*
+   inline std::vector<std::string> fontNames( XX::Font::Description pattern ) {
+      return this->fontNames( pattern.asString() );
+   };
+   */
 
    /// Get a font by name.
    Font *getFont( const std::string fontName );

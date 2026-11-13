@@ -90,39 +90,6 @@ XX::Font::Font( XX::Display *display, const std::string name ) :
  */
 }
 
-void XX::Font::initializeClass() {
-   XX::Font::Slant::ANY             = XLFD_WILDCARD; 
-   XX::Font::Slant::ITALIC          = "i"; 
-   XX::Font::Slant::OBLIQUE         = "o"; 
-   XX::Font::Slant::ROMAN           = "r"; 
-   XX::Font::Slant::REVERSE_OBLIQUE = "ro"; 
-   XX::Font::Slant::REVERSE_ITALIC  = "ri"; 
-   XX::Font::Slant::OTHER           = "ot"; 
-   XX::Font::Slant::POLYMORPHIC     = "0"; 
-
-   XX::Font::Weight::ANY         = XLFD_WILDCARD;
-   XX::Font::Weight::EXTRA_LIGHT = "extralight"; 
-   XX::Font::Weight::LIGHT       = "light"; 
-   XX::Font::Weight::MEDIUM      = "medium"; 
-   XX::Font::Weight::BOLD        = "bold"; 
-   XX::Font::Weight::EXTRA_BOLD  = "extrabold"; 
-   XX::Font::Weight::BLACK       = "black"; 
-   XX::Font::Weight::POLYMORPHIC = "0";
-   XX::Font::Weight::THIN        = "thin";
-   XX::Font::Weight::REGULAR     = "regular";
-   XX::Font::Weight::DEMIBOLD    = "demibold";
-   XX::Font::Weight::SEMIBOLD    = "semibold";
-
-   XX::Font::Width::ANY             = XLFD_WILDCARD;
-   XX::Font::Width::SEMICONDENSED   = "semicondensed";
-   XX::Font::Width::EXTRA_CONDENSED = "extracondensed";
-   XX::Font::Width::CONDENSED       = "condensed"; 
-   XX::Font::Width::NARROW          = "narrow"; 
-   XX::Font::Width::NORMAL          = "normal"; 
-   XX::Font::Width::DOUBLE_WIDE     = "double wide"; 
-   XX::Font::Width::POLYMORPHIC     = "0";
-}
-
 //== Accessors =================================================================
 
 int XX::Font::width( ) const {
@@ -298,7 +265,7 @@ XLFD_EOF: ;
 /**
  * Get the XLFD string for this Font::Description.
  */
-std::string XX::Font::Description::asString() const {
+std::string XX::Font::Description::string() const {
    std::string name;
    std::string pixelSizeField = XLFD_WILDCARD;
    std::string pointSizeField = XLFD_WILDCARD;
@@ -348,7 +315,7 @@ std::string XX::Font::Description::asString() const {
  *  Make this a Description for a polymorphic Font.  The weight, width, 
  *  and slant criteria will be set to POLYMORPHIC.
  */
-XX::Font::Description XX::Font::Description::setPolymorphic() {
+XX::Font::Description& XX::Font::Description::setPolymorphic() {
    this->setWeight( XX::Font::Weight::POLYMORPHIC );
    this->setWidth(  XX::Font::Width::POLYMORPHIC );
    this->setSlant(  XX::Font::Slant::POLYMORPHIC );
@@ -362,7 +329,7 @@ XX::Font::Description XX::Font::Description::setPolymorphic() {
  *  Make this a Description for a non-polymorphic Font.  The weight, width, 
  *  and slant criteria will be set to ANY.
  */
-XX::Font::Description XX::Font::Description::notPolymorphic() {
+XX::Font::Description& XX::Font::Description::notPolymorphic() {
    this->polymorphic_ = false;
 
    this->setWeight( XX::Font::Weight::ANY );
@@ -376,7 +343,7 @@ XX::Font::Description XX::Font::Description::notPolymorphic() {
  *  Make this a Description for a scalable Font.  The pixelSize, pointSize, 
  *  and averageWidth criteria will be zeroed out.
  */
-XX::Font::Description XX::Font::Description::setScalable() {
+XX::Font::Description& XX::Font::Description::setScalable() {
    this->scalable_ = true;
 
    this->setPixelSize(0);
@@ -390,7 +357,7 @@ XX::Font::Description XX::Font::Description::setScalable() {
  *  Make this a Description for a non-scalable Font.  The pixelSize, pointSize, 
  *  resolution, and averageWidth criteria will be cleared.
  */
-XX::Font::Description XX::Font::Description::notScalable() {
+XX::Font::Description& XX::Font::Description::notScalable() {
    this->scalable_ = false;
 
    this->hasPixelSize = false;
@@ -404,7 +371,7 @@ XX::Font::Description XX::Font::Description::notScalable() {
 /**
  * The name of the organization that created or provided the font.
  */
-XX::Font::Description XX::Font::Description::setFoundry( std::string foundry ) {
+XX::Font::Description& XX::Font::Description::setFoundry( std::string foundry ) {
    this->foundry_ = foundry;
    return *this;
 }
@@ -413,7 +380,7 @@ XX::Font::Description XX::Font::Description::setFoundry( std::string foundry ) {
  * The typeface of the font.  Examples include arial, courier, gothic, 
  * helvetica, lucida, roboto, and times.
  */
-XX::Font::Description XX::Font::Description::setFamily( std::string family ) {
+XX::Font::Description& XX::Font::Description::setFamily( std::string family ) {
    this->family_ = family;
    return *this;
 }
@@ -435,7 +402,7 @@ XX::Font::Description XX::Font::Description::setFamily( std::string family ) {
  * <li><code>XX::Font::Weight::<b>THIN</b></code>
  * </ul>
  */
-XX::Font::Description XX::Font::Description::setWeight( std::string weight ) {
+XX::Font::Description& XX::Font::Description::setWeight( std::string weight ) {
    this->weight_ = weight;
    return *this;
 }
@@ -453,7 +420,7 @@ XX::Font::Description XX::Font::Description::setWeight( std::string weight ) {
  * <li><code>XX::Font::Slant::<b>OTHER</b></code>
  * </ul>
  */
-XX::Font::Description XX::Font::Description::setSlant( std::string slant ) {
+XX::Font::Description& XX::Font::Description::setSlant( std::string slant ) {
    this->slant_ = slant;
    return *this;
 }
@@ -472,7 +439,7 @@ XX::Font::Description XX::Font::Description::setSlant( std::string slant ) {
  * <li><code>XX::Font::Width::<b>SEMICONDENSED</b></code>
  * </ul>
  */
-XX::Font::Description XX::Font::Description::setWidth( std::string width ) {
+XX::Font::Description& XX::Font::Description::setWidth( std::string width ) {
    this->width_ = width;
    return *this;
 }
@@ -485,13 +452,13 @@ XX::Font::Description XX::Font::Description::setWidth( std::string width ) {
  * <p>
  * Examples include things like "serif", "sans", "informal", and "decorated".
  */
-XX::Font::Description XX::Font::Description::setStyling( std::string style ) {
+XX::Font::Description& XX::Font::Description::setStyling( std::string style ) {
    this->style_ = style;
    return *this;
 }
 
 /// Clear the pixelSize criterion.
-XX::Font::Description XX::Font::Description::noPixelSize( ) {
+XX::Font::Description& XX::Font::Description::noPixelSize( ) {
    this->hasPixelSize = false;
    return *this;
 }
@@ -502,14 +469,14 @@ XX::Font::Description XX::Font::Description::noPixelSize( ) {
  * of the point size or vertical resolution for which the font was designed.
  */
 // TODO: matrix?
-XX::Font::Description XX::Font::Description::setPixelSize( unsigned int size ) {
+XX::Font::Description& XX::Font::Description::setPixelSize( unsigned int size ) {
    this->pixelSize_ = size;
    this->hasPixelSize = true;
    return *this;
 }
 
 /// Clear the pointSize criterion.
-XX::Font::Description XX::Font::Description::noPointSize( ) {
+XX::Font::Description& XX::Font::Description::noPointSize( ) {
    this->hasPointSize = false;
    return *this;
 }
@@ -518,14 +485,14 @@ XX::Font::Description XX::Font::Description::noPointSize( ) {
  * Body size in typographic points (72.27 points per inch).
  */
 // TODO: matrix?
-XX::Font::Description XX::Font::Description::setPointSize( float size ) {
+XX::Font::Description& XX::Font::Description::setPointSize( float size ) {
    this->pointSize_ = size;
    this->hasPointSize = true;
    return *this;
 }
 
 /// Clear the resolution criteria.
-XX::Font::Description XX::Font::Description::noResolution( ) {
+XX::Font::Description& XX::Font::Description::noResolution( ) {
    this->hasResolution = false;
    return *this;
 }
@@ -533,7 +500,7 @@ XX::Font::Description XX::Font::Description::noResolution( ) {
 /**
  * Font resolution in dpi.
  */
-XX::Font::Description XX::Font::Description::setResolution( 
+XX::Font::Description& XX::Font::Description::setResolution( 
       unsigned int x, unsigned int y) {
    this->resolutionX_ = x;
    this->resolutionY_ = y;
@@ -550,13 +517,13 @@ XX::Font::Description XX::Font::Description::setResolution(
  * <li><code>XX::Font::Spacing::<b>CHAR_CELL</b></code>
  * </ul>
  */
-XX::Font::Description XX::Font::Description::setSpacing( char spacing ) {
+XX::Font::Description& XX::Font::Description::setSpacing( char spacing ) {
    this->spacing_ = spacing;
    return *this;
 }
 
 /// Clear the averageWidth criterion.
-XX::Font::Description XX::Font::Description::noAverageWidth( ) {
+XX::Font::Description& XX::Font::Description::noAverageWidth( ) {
    this->hasAverageWidth = false;
    return *this;
 }
@@ -568,7 +535,7 @@ XX::Font::Description XX::Font::Description::noAverageWidth( ) {
  * <p>
  * A negative average width indicates that the font is written right-to-left.
  */
-XX::Font::Description XX::Font::Description::setAverageWidth( float width ) {
+XX::Font::Description& XX::Font::Description::setAverageWidth( float width ) {
    this->averageWidth_ = width;
    this->hasAverageWidth = true;
    return *this;
@@ -577,7 +544,7 @@ XX::Font::Description XX::Font::Description::setAverageWidth( float width ) {
 /**
  * The registration authority for the character encoding of the font.
  */
-XX::Font::Description XX::Font::Description::setCharsetRegistry( 
+XX::Font::Description& XX::Font::Description::setCharsetRegistry( 
       std::string registry ) {
    this->charsetRegistry_ = registry;
    return *this;
@@ -586,7 +553,7 @@ XX::Font::Description XX::Font::Description::setCharsetRegistry(
 /**
  * The specific character set within the registry.
  */
-XX::Font::Description XX::Font::Description::setCharsetEncoding( 
+XX::Font::Description& XX::Font::Description::setCharsetEncoding( 
       std::string encoding ) {
    this->charsetEncoding_ = encoding;
    return *this;

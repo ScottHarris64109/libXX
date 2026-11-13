@@ -26,38 +26,38 @@ public:
       static const char CHAR_CELL = 'c';
    };
    struct Slant { // namespace
-      static std::string ANY;
-      static std::string ITALIC; 
-      static std::string OBLIQUE; 
-      static std::string ROMAN; 
-      static std::string REVERSE_OBLIQUE; 
-      static std::string REVERSE_ITALIC; 
-      static std::string OTHER;
-      static std::string POLYMORPHIC;
+      inline static const std::string ANY             = "*";
+      inline static const std::string ITALIC          = "i";
+      inline static const std::string OBLIQUE         = "o";
+      inline static const std::string ROMAN           = "r";
+      inline static const std::string REVERSE_OBLIQUE = "ro";
+      inline static const std::string REVERSE_ITALIC  = "ri";
+      inline static const std::string OTHER           = "ot";
+      inline static const std::string POLYMORPHIC     = "0";
    };
    struct Weight { // namespace
-      static std::string ANY;
-      static std::string EXTRA_LIGHT; 
-      static std::string LIGHT; 
-      static std::string THIN; 
-      static std::string MEDIUM; 
-      static std::string REGULAR; 
-      static std::string BOLD; 
-      static std::string DEMIBOLD; 
-      static std::string SEMIBOLD; 
-      static std::string EXTRA_BOLD; 
-      static std::string BLACK; 
-      static std::string POLYMORPHIC;
+      inline static const std::string ANY         = "*";
+      inline static const std::string EXTRA_LIGHT = "extralight";
+      inline static const std::string LIGHT       = "light";
+      inline static const std::string THIN        = "thin";
+      inline static const std::string MEDIUM      = "medium";
+      inline static const std::string REGULAR     = "regular";
+      inline static const std::string BOLD        = "bold";
+      inline static const std::string DEMIBOLD    = "demibold";
+      inline static const std::string SEMIBOLD    = "semibold";
+      inline static const std::string EXTRA_BOLD  = "extrabold";
+      inline static const std::string BLACK       = "black";
+      inline static const std::string POLYMORPHIC = "0";
    };
    struct Width { // namespace
-      static std::string ANY;
-      static std::string EXTRA_CONDENSED; 
-      static std::string CONDENSED; 
-      static std::string SEMICONDENSED; 
-      static std::string NARROW; 
-      static std::string NORMAL; 
-      static std::string DOUBLE_WIDE; 
-      static std::string POLYMORPHIC;
+      inline static const std::string ANY             = "*";
+      inline static const std::string EXTRA_CONDENSED = "extracondensed";
+      inline static const std::string CONDENSED       = "condensed";
+      inline static const std::string SEMICONDENSED   = "semicondensed";
+      inline static const std::string NARROW          = "narrow";
+      inline static const std::string NORMAL          = "normal";
+      inline static const std::string DOUBLE_WIDE     = "double wide";
+      inline static const std::string POLYMORPHIC     = "0";
    };
 
    //.. XFLD ...................................................................
@@ -93,15 +93,15 @@ public:
       char spacing_{Spacing::ANY};
       bool hasAverageWidth{false};
       float averageWidth_{0.0};
-      std::string charsetRegistry_{""};
-      std::string charsetEncoding_{""};
+      std::string charsetRegistry_{"*"};
+      std::string charsetEncoding_{"*"};
 
    public:
       Description();
       Description( std::string );
       virtual ~Description();
 
-      std::string asString() const;
+      std::string string() const;
 
       inline bool isPolymorphic() const { return polymorphic_; };
       inline bool isScalable() const { return scalable_; };
@@ -120,27 +120,27 @@ public:
       inline std::string charsetRegistry() const { return charsetRegistry_; };
       inline std::string charsetEncoding() const { return charsetEncoding_; };
 
-      Description setPolymorphic();
-      Description notPolymorphic();
-      Description setScalable();
-      Description notScalable();
-      Description setFoundry( std::string );
-      Description setFamily( std::string );
-      Description setWeight( std::string );
-      Description setSlant( std::string );
-      Description setWidth( std::string );
-      Description setStyling( std::string );
-      Description noPixelSize( );
-      Description setPixelSize( unsigned int );
-      Description noPointSize( );
-      Description setPointSize( float );
-      Description noResolution( );
-      Description setResolution( unsigned int, unsigned int );
-      Description setSpacing( char );
-      Description noAverageWidth( );
-      Description setAverageWidth( float );
-      Description setCharsetRegistry( std::string );
-      Description setCharsetEncoding( std::string );
+      Description& setPolymorphic();
+      Description& notPolymorphic();
+      Description& setScalable();
+      Description& notScalable();
+      Description& setFoundry( std::string );
+      Description& setFamily( std::string );
+      Description& setWeight( std::string );
+      Description& setSlant( std::string );
+      Description& setWidth( std::string );
+      Description& setStyling( std::string );
+      Description& noPixelSize( );
+      Description& setPixelSize( unsigned int );
+      Description& noPointSize( );
+      Description& setPointSize( float );
+      Description& noResolution( );
+      Description& setResolution( unsigned int, unsigned int );
+      Description& setSpacing( char );
+      Description& noAverageWidth( );
+      Description& setAverageWidth( float );
+      Description& setCharsetRegistry( std::string );
+      Description& setCharsetEncoding( std::string );
    };
 
    //...........................................................................
@@ -149,8 +149,6 @@ private:
    XX::Display *display;
    XFontStruct *xfont; // https://tronche.com/gui/x/xlib/graphics/font-metrics/
    std::string name_;
-
-   static void initializeClass();
 
    //== Constructors ===========================================================
 

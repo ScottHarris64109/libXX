@@ -111,7 +111,6 @@ XX::Display::Display( std::string displayName ) : name_( displayName ) {
    for (int s = 0; s < this->screenCount(); s++) {
       screen_[s] = new XX::Screen( this, s );
    }
-   XX::Font::initializeClass();
 }
 
 //== Accessors ================================================================

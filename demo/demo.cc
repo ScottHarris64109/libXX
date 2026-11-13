@@ -52,6 +52,7 @@ extern "C" void signalHandler( int theSignal );
 
 void listScreens( XX::Display &display );
 void listFonts( XX::Display &display );
+XX::Font *pickFont( XX::Display &display, std::string family, float points );
 
 //==============================================================================
 int main( int argc, char *argv[] ) {
@@ -60,6 +61,7 @@ int main( int argc, char *argv[] ) {
    std::string fg1name = getArg( arg, "-foreground", 0, "black" );
    std::string fg2name = getArg( arg, "-foreground", 1, "red" );
    std::string bgname  = getArg( arg, "-background", 0, "white" );
+   std::string fontName = getArg( arg, "-font", 0, "arial" );
 
    // XX::EventHandlers
    PopupDraw drawPopup;
@@ -93,12 +95,19 @@ int main( int argc, char *argv[] ) {
 #ifdef X_HAVE_UTF8_STRING
    std::cout << "X_HAVE_UTF8_STRING\n";
 #else
-   std::cout << "Doesn't X_HAVE_UTF8_STRING\n";
+   std::cout << "Doesn't have X_HAVE_UTF8_STRING\n";
 #endif
    std::cout << "\n";
 
    Palette palette;
-   palette.font = display.getFont( "variable" );
+   palette.font = pickFont( display, fontName, 10.0 );
+   if (!palette.font) {
+      palette.font = pickFont( display, "helvetica", 10.0 );
+   }
+   if (!palette.font) {
+      palette.font = display.getFont( "variable" );
+   }
+
    palette.background = display.screen()->getColor( bgname );
    palette.color[0]   = display.screen()->getColor( fg1name );
    palette.color[1]   = display.screen()->getColor( fg2name );
@@ -245,3 +254,39 @@ void listFonts( XX::Display &display ) {
    std::cout << "\n";
 }
 
+//------------------------------------------------------------------------------
+XX::Font *pickFont( XX::Display &display, std::string family, float points ) {
+   XX::Font* font = nullptr;
+   XX::Font::Description description;
+
+   description.setSlant( XX::Font::Slant::ROMAN )
+              .setWeight( XX::Font::Weight::MEDIUM );
+   description.setFamily( family ).setPointSize( points );
+
+   std::cout << "   Looking for \"" << description.string() <<"\"\n";
+   std::vector<std::string> fontNames = display.fontNames( description.string() );
+
+   if (fontNames.empty()) {
+      std::cout << "   No " << points << " point " << family << " fonts.\n";
+      description.setScalable();
+      std::cout << "   Looking for \"" << description.string() <<"\"\n";
+      fontNames = display.fontNames( description.string() );
+      if (fontNames.empty()) {
+         std::cout << "   No scalable " << family << " fonts.\n";
+      } else {
+         description = XX::Font::Description( fontNames.front() );
+         description.setPointSize( points );
+         std::cout << "   Looking for \"" << description.string() <<"\"\n";
+         fontNames = display.fontNames( description.string() );
+      }
+   }
+
+   if (fontNames.empty()) {
+      std::cout << "No " << points << " point " << family << " fonts.\n";
+   } else {
+      font = display.getFont( fontNames.front() );
+      std::cout << "Using " << font->name() << ".\n";
+   }
+
+   return font;
+}
